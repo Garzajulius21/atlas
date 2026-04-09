@@ -1,6 +1,6 @@
 # ATLAS — Threat Correlation & Clustering Framework
 
-![Status](https://img.shields.io/badge/Status-In%20Development-orange)
+![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
 ![Stack](https://img.shields.io/badge/Stack-Python%20%2B%20React-blue)
 ![Privacy](https://img.shields.io/badge/Privacy-PII%20Hashed%20Locally-green)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -52,12 +52,18 @@ Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves y
 ## Setup
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.12 (via `brew install python@3.12`)
 - Node.js v18+
 
 ### Install
 ```bash
-cd backend && pip install -r requirements.txt
+# Backend — create a Python 3.12 venv (required for scikit-learn)
+cd backend
+/opt/homebrew/bin/python3.12 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Frontend
 cd ../frontend && npm install
 ```
 
@@ -65,7 +71,7 @@ cd ../frontend && npm install
 Double-click `start-atlas.command` or run manually:
 ```bash
 # Terminal 1
-cd backend && python server.py
+cd backend && source venv/bin/activate && python server.py
 
 # Terminal 2
 cd frontend && npm run dev
@@ -104,12 +110,13 @@ See `SPEC.md` for full technical specification, KQL queries, algorithm details, 
 | Phase | Status |
 |-------|--------|
 | Spec & architecture | ✅ Complete |
-| Backend — ingest & sanitize | 🔄 In progress |
-| Backend — correlation & clustering | Pending |
-| Backend — MITRE gap analysis | Pending |
-| Backend — recommendations engine | Pending |
-| Frontend — upload & incident browser | Pending |
-| Frontend — cluster map | Pending |
-| Frontend — department heatmap | Pending |
-| Frontend — MITRE gap panel | Pending |
-| Frontend — recommendations panel | Pending |
+| Backend — ingest & sanitize | ✅ Complete |
+| Backend — correlation & clustering | ✅ Complete |
+| Backend — MITRE gap analysis | ✅ Complete |
+| Backend — departmental heatmap | ✅ Complete |
+| Backend — recommendations engine | ✅ Complete |
+| Frontend — upload & incident browser | ✅ Complete |
+| Frontend — campaign cluster view | ✅ Complete |
+| Frontend — department risk heatmap | ✅ Complete |
+| Frontend — MITRE ATT&CK gap panel | ✅ Complete |
+| Frontend — recommendations panel | ✅ Complete |
