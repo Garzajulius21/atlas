@@ -26,10 +26,13 @@ FRONTEND_PID=$!
 sleep 2
 
 echo ""
-echo "✓ ATLAS is running at http://localhost:5173"
+echo "✓ ATLAS is running at http://localhost:5174"
 echo ""
 echo "  Press Ctrl+C to stop both services."
 echo ""
+
+# Open browser
+open http://localhost:5174
 
 # Wait and clean up on exit
 trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; echo 'ATLAS stopped.'" INT TERM
