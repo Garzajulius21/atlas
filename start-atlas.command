@@ -12,7 +12,7 @@ echo ""
 echo "→ Starting backend (Flask on :3001)..."
 cd "$DIR/backend"
 source venv/bin/activate
-python server.py &
+python3 server.py &
 BACKEND_PID=$!
 
 sleep 2
