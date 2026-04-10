@@ -6,6 +6,7 @@ import ClusterMap from './components/ClusterMap.jsx';
 import HeatmapPanel from './components/HeatmapPanel.jsx';
 import MitrePanel from './components/MitrePanel.jsx';
 import RecommendPanel from './components/RecommendPanel.jsx';
+import ExportButton from './components/ExportButton.jsx';
 
 const TABS = ['Incidents', 'Campaign Map', 'Campaigns', 'MITRE', 'Risk Heatmap', 'Recommendations'];
 
@@ -127,7 +128,17 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {hasData && (
+            <ExportButton
+              incidents={incidents}
+              clusters={clusters}
+              correlations={correlations}
+              mitre={mitre}
+              heatmap={heatmap}
+              recommendations={recommendations}
+            />
+          )}
           <span style={{
             fontSize: '11px', color: 'var(--text-secondary)',
             padding: '3px 8px', border: '1px solid var(--border)', borderRadius: '4px',
