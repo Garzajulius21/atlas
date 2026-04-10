@@ -184,8 +184,61 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
     return <span style={{ marginLeft: '4px', color: 'var(--accent-blue)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
+  // Severity counts across ALL incidents (not filtered) for the summary bar
+  const sevCounts = useMemo(() => {
+    const counts = { High: 0, Medium: 0, Low: 0, Informational: 0 };
+    for (const inc of incidents) {
+      if (counts[inc.Severity] !== undefined) counts[inc.Severity]++;
+    }
+    return counts;
+  }, [incidents]);
+
   return (
     <>
+      {/* Severity summary bar */}
+      <div style={{
+        display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center',
+        padding: '10px 16px',
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '10px',
+      }}>
+        <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginRight: '4px' }}>
+          Risk Profile
+        </span>
+        {[
+          { label: 'High',          color: '#ff7b7b', bg: 'rgba(255,68,68,0.12)',   border: 'rgba(255,68,68,0.3)'   },
+          { label: 'Medium',        color: '#ffaa33', bg: 'rgba(255,149,0,0.12)',   border: 'rgba(255,149,0,0.3)'   },
+          { label: 'Low',           color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.25)' },
+          { label: 'Informational', color: '#5a7a9a', bg: 'rgba(90,122,154,0.12)', border: 'rgba(90,122,154,0.25)' },
+        ].map(({ label, color, bg, border }) => (
+          <button
+            key={label}
+            onClick={() => handleSev(severityFilter === label ? 'All' : label)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '4px 10px', borderRadius: '5px', cursor: 'pointer',
+              backgroundColor: severityFilter === label ? bg : 'transparent',
+              border: `1px solid ${severityFilter === label ? border : 'var(--border)'}`,
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = bg; e.currentTarget.style.borderColor = border; }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = severityFilter === label ? bg : 'transparent';
+              e.currentTarget.style.borderColor = severityFilter === label ? border : 'var(--border)';
+            }}
+          >
+            <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'monospace', color, lineHeight: 1 }}>
+              {sevCounts[label]}
+            </span>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{label}</span>
+          </button>
+        ))}
+        <span style={{ fontSize: '10px', color: 'var(--text-secondary)', marginLeft: 'auto', fontStyle: 'italic' }}>
+          Click to filter
+        </span>
+      </div>
+
       <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
 
         {/* Toolbar */}
