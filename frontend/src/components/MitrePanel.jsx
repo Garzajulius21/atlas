@@ -273,12 +273,17 @@ function TacticDrillDown({ tactic, allIncidents, clusters, correlations, onClose
 // ── Main panel ────────────────────────────────────────────────────────────────
 export default function MitrePanel({ data, allIncidents, clusters, correlations }) {
   const [drilledTactic, setDrilledTactic] = useState(null);
+  const [sortMode, setSortMode]           = useState('killchain'); // 'killchain' | 'active'
 
   if (!data) return null;
   const { tactic_coverage, top_techniques, covered_tactics, gap_tactics, total_unique_techniques } = data;
 
   const tacticMap  = Object.fromEntries((tactic_coverage || []).map(t => [t.id, t]));
   const maxCount   = Math.max(...(tactic_coverage || []).map(t => t.count), 1);
+
+  const tacticIds  = sortMode === 'active'
+    ? [...TACTIC_ORDER].sort((a, b) => (tacticMap[b]?.count || 0) - (tacticMap[a]?.count || 0))
+    : TACTIC_ORDER;
 
   // Build technique → campaign map for top techniques attribution
   const techCampaignMap = {};
@@ -312,6 +317,17 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#a855f7' }}>{coveredCount} tactic{coveredCount !== 1 ? 's' : ''} observed</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#ff7b7b' }}>{gapCount} coverage gap{gapCount !== 1 ? 's' : ''}</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{total_unique_techniques} unique techniques</span>
+          <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
+            {[['killchain', 'Kill Chain'], ['active', 'Most Active']].map(([mode, label]) => (
+              <button key={mode} onClick={() => setSortMode(mode)} style={{
+                padding: '3px 10px', fontSize: '10px', fontWeight: 600, cursor: 'pointer',
+                border: 'none', borderRight: mode === 'killchain' ? '1px solid var(--border)' : 'none',
+                backgroundColor: sortMode === mode ? 'rgba(168,85,247,0.15)' : 'transparent',
+                color: sortMode === mode ? '#a855f7' : 'var(--text-secondary)',
+                transition: 'all 0.15s',
+              }}>{label}</button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -324,7 +340,7 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
 
         {/* Tactic grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '8px' }}>
-          {TACTIC_ORDER.map(id => {
+          {tacticIds.map(id => {
             const tactic = tacticMap[id];
             return tactic ? (
               <TacticCell key={id} tactic={tactic} onDrillDown={handleDrillDown} isDrilled={drilledTactic?.id === id} maxCount={maxCount} />
