@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis,
-  Tooltip, ResponsiveContainer, Cell, Customized
+  Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import IncidentDrawer from './IncidentDrawer.jsx';
 import CampaignExplainer from './CampaignExplainer.jsx';
@@ -29,31 +29,6 @@ function getClusterColor(clusterId) {
 }
 
 
-// Rings rendered inside recharts SVG — background is handled by the container div
-function MapRings({ width, height, offset }) {
-  if (!width || !height || !offset) return null;
-  const cx = offset.left + (width - offset.left - offset.right) / 2;
-  const cy = offset.top + (height - offset.top - offset.bottom) / 2;
-  const maxR = Math.min(width - offset.left - offset.right, height - offset.top - offset.bottom) / 2;
-
-  return (
-    <g>
-      {[0.28, 0.52, 0.76].map((pct, i) => (
-        <circle
-          key={i}
-          cx={cx} cy={cy}
-          r={maxR * pct}
-          fill="none"
-          stroke="#2e2410"
-          strokeWidth={1}
-          strokeDasharray="3 5"
-        />
-      ))}
-      <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} stroke="#3d3218" strokeWidth={1} />
-      <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} stroke="#3d3218" strokeWidth={1} />
-    </g>
-  );
-}
 
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
@@ -219,8 +194,6 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
               />
               <ZAxis type="number" dataKey="z" range={[40, 140]} />
               <Tooltip content={<CustomTooltip />} cursor={false} />
-              <Customized component={MapRings} />
-
               {sortedGroups.map(group => {
                 const color = getClusterColor(group.clusterId);
                 const isIsolated = group.clusterId === null;
