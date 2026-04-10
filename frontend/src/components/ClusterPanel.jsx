@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import CampaignExplainer from './CampaignExplainer.jsx';
 
 const SEVERITY_COLORS = {
   High: '#ff7b7b',
@@ -27,7 +29,9 @@ function CohesionBar({ value }) {
   );
 }
 
-function ClusterCard({ cluster }) {
+function ClusterCard({ cluster, correlations }) {
+  const [showWhy, setShowWhy] = useState(false);
+
   const sevData = Object.entries(cluster.severity_breakdown)
     .filter(([, v]) => v > 0)
     .map(([sev, count]) => ({ sev, count, fill: SEVERITY_COLORS[sev] }));
@@ -106,11 +110,27 @@ function ClusterCard({ cluster }) {
           {cluster.incident_ids.length > 6 && <span style={{ color: 'var(--text-secondary)' }}> +{cluster.incident_ids.length - 6} more</span>}
         </div>
       </div>
+
+      {/* Why button */}
+      <button
+        onClick={() => setShowWhy(w => !w)}
+        style={{
+          width: '100%', padding: '7px', borderRadius: '5px', fontSize: '11px',
+          fontWeight: 600, cursor: 'pointer', fontFamily: 'monospace',
+          border: '1px solid rgba(168,85,247,0.35)',
+          backgroundColor: showWhy ? 'rgba(168,85,247,0.15)' : 'transparent',
+          color: '#a855f7', transition: 'all 0.15s',
+        }}
+      >
+        {showWhy ? '▲ Hide explanation' : '▾ Why were these clustered?'}
+      </button>
+
+      {showWhy && <CampaignExplainer cluster={cluster} correlations={correlations} />}
     </div>
   );
 }
 
-export default function ClusterPanel({ data }) {
+export default function ClusterPanel({ data, correlations }) {
   if (!data) return null;
   const { clusters, noise, total_clusters, total_noise } = data;
 
@@ -135,7 +155,7 @@ export default function ClusterPanel({ data }) {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px' }}>
-            {clusters.map(c => <ClusterCard key={c.id} cluster={c} />)}
+            {clusters.map(c => <ClusterCard key={c.id} cluster={c} correlations={correlations} />)}
           </div>
         )}
 

@@ -4,6 +4,7 @@ import {
   Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
 import IncidentDrawer from './IncidentDrawer.jsx';
+import CampaignExplainer from './CampaignExplainer.jsx';
 
 // Distinct colours for up to 10 campaigns + isolated
 const CLUSTER_COLORS = [
@@ -72,6 +73,12 @@ function CustomTooltip({ active, payload }) {
 export default function ClusterMap({ points, clusters, correlations, allIncidents }) {
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [highlightCluster, setHighlightCluster] = useState(null);
+  const [pinnedCluster, setPinnedCluster] = useState(null);
+
+  const clusterLookup = Object.fromEntries(
+    (clusters?.clusters || []).map(c => [c.id, c])
+  );
+  const pinnedClusterData = pinnedCluster !== null ? clusterLookup[pinnedCluster] : null;
 
   if (!points || points.length === 0) return null;
 
@@ -114,24 +121,29 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
             Campaign Map
           </div>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap' }}>
-            {sortedGroups.filter(g => g.clusterId !== null).map(g => (
-              <button
-                key={g.label}
-                onMouseEnter={() => setHighlightCluster(g.clusterId)}
-                onMouseLeave={() => setHighlightCluster(null)}
-                style={{
-                  padding: '3px 10px', borderRadius: '4px', fontSize: '11px',
-                  fontWeight: 600, fontFamily: 'monospace', cursor: 'pointer',
-                  border: `1px solid ${getClusterColor(g.clusterId)}55`,
-                  backgroundColor: `${getClusterColor(g.clusterId)}18`,
-                  color: getClusterColor(g.clusterId),
-                  transition: 'all 0.15s',
-                  opacity: highlightCluster !== null && highlightCluster !== g.clusterId ? 0.4 : 1,
-                }}
-              >
-                {g.label} ({g.points.length})
-              </button>
-            ))}
+            {sortedGroups.filter(g => g.clusterId !== null).map(g => {
+              const isPinned = pinnedCluster === g.clusterId;
+              const color = getClusterColor(g.clusterId);
+              return (
+                <button
+                  key={g.label}
+                  onMouseEnter={() => setHighlightCluster(g.clusterId)}
+                  onMouseLeave={() => setHighlightCluster(null)}
+                  onClick={() => setPinnedCluster(isPinned ? null : g.clusterId)}
+                  style={{
+                    padding: '3px 10px', borderRadius: '4px', fontSize: '11px',
+                    fontWeight: 600, fontFamily: 'monospace', cursor: 'pointer',
+                    border: `1px solid ${isPinned ? color : color + '55'}`,
+                    backgroundColor: isPinned ? `${color}30` : `${color}18`,
+                    color,
+                    transition: 'all 0.15s',
+                    opacity: highlightCluster !== null && highlightCluster !== g.clusterId ? 0.4 : 1,
+                  }}
+                >
+                  {g.label} ({g.points.length}) {isPinned ? '▾' : '?'}
+                </button>
+              );
+            })}
             <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-secondary)', padding: '3px 8px' }}>
               {groups['Isolated']?.points.length || 0} isolated
             </span>
@@ -144,6 +156,13 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
             Dot size = severity &nbsp;·&nbsp; Proximity = correlation strength &nbsp;·&nbsp; Click any dot to inspect
           </span>
         </div>
+
+        {/* Explainer */}
+        {pinnedClusterData && (
+          <div style={{ padding: '0 16px' }}>
+            <CampaignExplainer cluster={pinnedClusterData} correlations={correlations} />
+          </div>
+        )}
 
         {/* Chart */}
         <div style={{ padding: '8px 16px 16px' }}>
