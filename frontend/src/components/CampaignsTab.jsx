@@ -1,17 +1,11 @@
 /**
- * CampaignsTab — overview-first campaign intelligence view.
- * Layout (Stephen Few, overview → detail):
- *   1. Campaign Timeline — incidents plotted at actual timestamps per campaign lane
- *   2. Campaign Detail cards — severity, MITRE, incidents, explainer
- *
- * Shared highlightCluster links both sections on hover.
+ * CampaignsTab — overview-first campaign intelligence.
+ * Section 1: Gantt-style timeline — one lane per campaign, incidents as
+ *   clickable circles on a real time axis, duration line connecting them.
+ * Section 2: Campaign detail cards.
  */
 
-import { useState } from 'react';
-import {
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis,
-  Tooltip, ResponsiveContainer, Cell, ReferenceArea,
-} from 'recharts';
+import { useState, useRef } from 'react';
 import CampaignExplainer from './CampaignExplainer.jsx';
 import IncidentDrawer from './IncidentDrawer.jsx';
 
@@ -20,195 +14,237 @@ const CLUSTER_COLORS = [
   '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
 ];
 const ISOLATED_COLOR = '#6b7280';
-const SEVERITY_SIZES = { High: 130, Medium: 85, Low: 55, Informational: 38 };
 const SEVERITY_COLORS = { High: '#ff7b7b', Medium: '#ffaa33', Low: '#f59e0b', Informational: '#5a7a9a' };
-const SEV_ORDER = ['High', 'Medium', 'Low', 'Informational'];
+const DOT_SIZES   = { High: 18, Medium: 14, Low: 11, Informational: 9 };
+const SEV_ORDER   = ['High', 'Medium', 'Low', 'Informational'];
 
 function getClusterColor(clusterId) {
   if (clusterId === null || clusterId === undefined) return ISOLATED_COLOR;
   return CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
 }
 
-// ── Timeline tooltip ──────────────────────────────────────────────────────────
-function TimelineTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
-  if (!d) return null;
-  const color = getClusterColor(d.clusterId);
-  const time = new Date(d.x).toLocaleString([], {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-  return (
-    <div style={{
-      backgroundColor: '#13100a', border: `1px solid ${color}55`,
-      borderRadius: '8px', padding: '10px 14px', fontSize: '12px',
-      maxWidth: '300px', boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
-    }}>
-      <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#7a6a4a', marginBottom: '4px' }}>
-        {d.incidentId} · {time}
-      </div>
-      <div style={{ color: '#e8dcc8', fontWeight: 600, marginBottom: '6px', lineHeight: 1.4 }}>
-        {d.title}
-      </div>
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', fontFamily: 'monospace', color, fontWeight: 700 }}>{d.clusterLabel}</span>
-        <span style={{ fontSize: '10px', color: '#7a6a4a' }}>·</span>
-        <span style={{ fontSize: '10px', color: SEVERITY_COLORS[d.severity] || '#7a6a4a' }}>{d.severity}</span>
-        {d.department && (
-          <><span style={{ fontSize: '10px', color: '#7a6a4a' }}>·</span>
-          <span style={{ fontSize: '10px', color: '#7a6a4a' }}>{d.department}</span></>
-        )}
-      </div>
-      <div style={{ fontSize: '10px', color: '#7a6a4a', marginTop: '6px', fontStyle: 'italic' }}>
-        Click to inspect
-      </div>
-    </div>
-  );
-}
+// ── Gantt Timeline ────────────────────────────────────────────────────────────
+function GanttTimeline({ clusters, allIncidents, highlightCluster, setHighlightCluster, onSelectIncident, selectedIncidentId }) {
+  const containerRef = useRef(null);
+  const [tooltip, setTooltip] = useState(null); // { inc, x, y }
 
-// ── Campaign Timeline ─────────────────────────────────────────────────────────
-function CampaignTimeline({ clusters, allIncidents, highlightCluster, setHighlightCluster, onSelectIncident, selectedIncidentId }) {
   const campaignList = clusters?.clusters || [];
 
-  // Build incidentId → clusterId map
+  // incidentId → clusterId
   const incidentClusterMap = {};
   for (const c of campaignList) {
     for (const id of c.incident_ids) incidentClusterMap[id] = c.id;
   }
 
-  // Parse incidents into timeline points
-  const allPoints = [];
-  for (const inc of (allIncidents || [])) {
-    const ts = new Date(inc.CreatedTime).getTime();
-    if (isNaN(ts)) continue;
-    const clusterId = incidentClusterMap[inc.IncidentId];
-    const lane = clusterId !== undefined ? clusterId : campaignList.length;
-    allPoints.push({
-      x: ts,
-      y: lane,
-      z: SEVERITY_SIZES[inc.Severity] || 50,
-      incidentId: inc.IncidentId,
-      title: inc.Title,
-      severity: inc.Severity,
-      clusterId: clusterId !== undefined ? clusterId : null,
-      clusterLabel: clusterId !== undefined ? (campaignList[clusterId]?.label || `Campaign ${clusterId + 1}`) : 'Isolated',
-      department: inc.Department,
-    });
+  const incidentMap = Object.fromEntries((allIncidents || []).map(i => [i.IncidentId, i]));
+
+  // Build one lane per campaign
+  const lanes = campaignList.map(c => ({
+    id: c.id,
+    label: c.label,
+    color: getClusterColor(c.id),
+    isIsolated: false,
+    incidents: c.incident_ids
+      .map(id => incidentMap[id])
+      .filter(Boolean)
+      .map(i => ({ ...i, ts: new Date(i.CreatedTime).getTime() }))
+      .filter(i => !isNaN(i.ts))
+      .sort((a, b) => a.ts - b.ts),
+  }));
+
+  // Isolated lane
+  const isolatedIncidents = (allIncidents || [])
+    .filter(i => incidentClusterMap[i.IncidentId] === undefined)
+    .map(i => ({ ...i, ts: new Date(i.CreatedTime).getTime() }))
+    .filter(i => !isNaN(i.ts))
+    .sort((a, b) => a.ts - b.ts);
+
+  if (isolatedIncidents.length > 0) {
+    lanes.push({ id: null, label: 'Isolated', color: ISOLATED_COLOR, isIsolated: true, incidents: isolatedIncidents });
   }
 
-  if (!allPoints.length) return null;
+  const allTimes = lanes.flatMap(l => l.incidents.map(i => i.ts));
+  if (!allTimes.length) return null;
 
-  const times = allPoints.map(p => p.x);
-  const minT = Math.min(...times);
-  const maxT = Math.max(...times);
-  const span = maxT - minT;
-  const pad = Math.max(span * 0.08, 3_600_000); // min 1h padding
-  const xDomain = [minT - pad, maxT + pad];
+  const minT = Math.min(...allTimes);
+  const maxT = Math.max(...allTimes);
+  const span = Math.max(maxT - minT, 3_600_000); // at least 1h span
+  const pad  = Math.max(span * 0.07, 1_800_000);
+  const domainMin = minT - pad;
+  const domainMax = maxT + pad;
+  const domain    = domainMax - domainMin;
 
-  const numLanes = campaignList.length + 1; // last lane = isolated
-  const yDomain = [-0.65, numLanes - 0.35];
+  const toPct = (ts) => `${((ts - domainMin) / domain) * 100}%`;
 
-  // Group by clusterId for separate Scatter series
-  const groups = {};
-  for (const p of allPoints) {
-    const key = p.clusterId === null ? '__isolated' : `c${p.clusterId}`;
-    if (!groups[key]) groups[key] = { clusterId: p.clusterId, points: [] };
-    groups[key].points.push(p);
-  }
-
-  const formatTick = (ts) => {
+  const formatTs = (ts) => {
     const d = new Date(ts);
-    if (span < 86_400_000) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (span < 7 * 86_400_000) return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (span < 86_400_000)        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (span < 7 * 86_400_000)   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
-  // Custom Y-axis tick: campaign label with color dot
-  const CustomYTick = ({ x, y, payload }) => {
-    const lane = payload.value;
-    const isIsolated = lane === campaignList.length;
-    const color = isIsolated ? ISOLATED_COLOR : getClusterColor(lane);
-    const label = isIsolated ? 'Isolated' : (campaignList[lane]?.label || `Campaign ${lane + 1}`);
-    // Truncate long labels
-    const maxLen = 18;
-    const display = label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <circle cx={-6} cy={1} r={3.5} fill={color} fillOpacity={isIsolated ? 0.5 : 0.9} />
-        <text x={-14} y={0} dy={4} textAnchor="end" fontSize={10} fill={color}
-          fontFamily="monospace" fillOpacity={isIsolated ? 0.6 : 1}>
-          {display}
-        </text>
-      </g>
-    );
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map(f => ({
+    pct: f * 100,
+    label: formatTs(domainMin + f * domain),
+  }));
+
+  const showTooltip = (e, inc) => {
+    const cRect = containerRef.current.getBoundingClientRect();
+    const dRect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      inc,
+      x: dRect.left - cRect.left + dRect.width / 2,
+      y: dRect.top  - cRect.top,
+    });
   };
 
-  const chartHeight = Math.max(300, numLanes * 72 + 70);
-
   return (
-    <div style={{ backgroundColor: '#0a0805', border: '1px solid #2e2410', borderRadius: '8px', overflow: 'hidden' }}>
-      <ResponsiveContainer width="100%" height={chartHeight}>
-        <ScatterChart margin={{ top: 24, right: 28, bottom: 32, left: 160 }}>
-          {/* Subtle alternating lane stripes */}
-          {Array.from({ length: numLanes }, (_, i) => (
-            i % 2 === 0
-              ? <ReferenceArea key={i} y1={i - 0.5} y2={i + 0.5} fill="#ffffff" fillOpacity={0.015} />
-              : null
-          ))}
+    <div ref={containerRef} style={{
+      position: 'relative',
+      backgroundColor: '#0a0805',
+      border: '1px solid #2e2410',
+      borderRadius: '8px',
+      padding: '12px 16px 4px',
+      overflowX: 'hidden',
+    }}>
 
-          <XAxis
-            type="number" dataKey="x"
-            domain={xDomain} scale="time"
-            tickFormatter={formatTick}
-            tick={{ fontSize: 10, fill: '#7a6a4a', fontFamily: 'monospace' }}
-            axisLine={{ stroke: '#2e2410' }}
-            tickLine={{ stroke: '#2e2410' }}
-          />
-          <YAxis
-            type="number" dataKey="y"
-            domain={yDomain}
-            ticks={Array.from({ length: numLanes }, (_, i) => i)}
-            tick={<CustomYTick />}
-            axisLine={false}
-            tickLine={false}
-            width={155}
-          />
-          <ZAxis type="number" dataKey="z" range={[38, 140]} />
-          <Tooltip content={<TimelineTooltip />} cursor={false} />
+      {/* Lanes */}
+      {lanes.map((lane, laneIdx) => {
+        const firstTs = lane.incidents[0]?.ts;
+        const lastTs  = lane.incidents[lane.incidents.length - 1]?.ts;
+        const dimmed  = highlightCluster !== null && highlightCluster !== lane.id && !lane.isIsolated;
 
-          {Object.values(groups).map(group => {
-            const color = group.clusterId === null ? ISOLATED_COLOR : getClusterColor(group.clusterId);
-            const isIsolated = group.clusterId === null;
-            const dimmed = highlightCluster !== null && highlightCluster !== group.clusterId && !isIsolated;
-            return (
-              <Scatter
-                key={group.clusterId === null ? 'isolated' : group.clusterId}
-                data={group.points}
-                onClick={(data) => onSelectIncident?.(data)}
-                style={{ cursor: 'pointer' }}
-              >
-                {group.points.map((p, i) => {
-                  const isSelected = selectedIncidentId === p.incidentId;
-                  return (
-                    <Cell key={i}
-                      fill={color}
-                      fillOpacity={dimmed ? 0.08 : isIsolated ? 0.45 : 0.88}
-                      stroke={isSelected ? '#ffffff' : color}
-                      strokeWidth={isSelected ? 3 : 1}
-                      strokeOpacity={dimmed ? 0.04 : isSelected ? 1 : 0.85}
-                    />
-                  );
-                })}
-              </Scatter>
-            );
-          })}
-        </ScatterChart>
-      </ResponsiveContainer>
+        return (
+          <div
+            key={lane.id ?? 'isolated'}
+            onMouseEnter={() => !lane.isIsolated && setHighlightCluster(lane.id)}
+            onMouseLeave={() => setHighlightCluster(null)}
+            style={{
+              display: 'flex', alignItems: 'center', height: '54px',
+              opacity: dimmed ? 0.15 : 1, transition: 'opacity 0.15s',
+              backgroundColor: laneIdx % 2 === 0 ? 'rgba(255,255,255,0.013)' : 'transparent',
+              borderRadius: '4px',
+            }}
+          >
+            {/* Label column */}
+            <div style={{ width: '155px', flexShrink: 0, paddingRight: '14px', textAlign: 'right' }}>
+              <div style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 600,
+                color: lane.color, opacity: lane.isIsolated ? 0.55 : 1,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {lane.label}
+              </div>
+              <div style={{ fontSize: '9px', color: '#5a4a2a', marginTop: '2px' }}>
+                {lane.incidents.length} incident{lane.incidents.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+
+            {/* Track */}
+            <div style={{ flex: 1, position: 'relative', height: '100%' }}>
+              {/* Duration line (only if >1 incident) */}
+              {lane.incidents.length > 1 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%', transform: 'translateY(-50%)',
+                  left: toPct(firstTs),
+                  right: `${(1 - (lastTs - domainMin) / domain) * 100}%`,
+                  height: '2px',
+                  backgroundColor: lane.isIsolated ? '#3a3a3a' : lane.color + '38',
+                }} />
+              )}
+
+              {/* Incident dots */}
+              {lane.incidents.map((inc) => {
+                const size = DOT_SIZES[inc.Severity] || 11;
+                const isSelected = selectedIncidentId === inc.IncidentId;
+                return (
+                  <div
+                    key={inc.IncidentId}
+                    onClick={() => onSelectIncident?.(inc)}
+                    onMouseEnter={(e) => showTooltip(e, inc)}
+                    onMouseLeave={() => setTooltip(null)}
+                    style={{
+                      position: 'absolute',
+                      left: toPct(inc.ts), top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: size, height: size,
+                      borderRadius: '50%',
+                      backgroundColor: lane.isIsolated ? ISOLATED_COLOR : lane.color,
+                      opacity: lane.isIsolated ? 0.45 : 0.9,
+                      border: isSelected ? '2px solid #ffffff' : `1.5px solid ${lane.isIsolated ? '#888' : lane.color}`,
+                      boxShadow: isSelected ? `0 0 0 3px ${lane.color}50` : `0 0 6px ${lane.color}50`,
+                      cursor: 'pointer',
+                      zIndex: isSelected ? 10 : 2,
+                      transition: 'transform 0.1s, box-shadow 0.1s',
+                    }}
+                    onMouseOver={e => { e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.35)'; e.currentTarget.style.zIndex = 20; }}
+                    onMouseOut={e => { e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)'; e.currentTarget.style.zIndex = isSelected ? 10 : 2; }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* X axis */}
+      <div style={{ display: 'flex', marginLeft: '155px', marginTop: '2px', position: 'relative', height: '26px' }}>
+        {ticks.map(tick => (
+          <div key={tick.pct} style={{
+            position: 'absolute', left: `${tick.pct}%`,
+            transform: 'translateX(-50%)',
+            fontSize: '9px', fontFamily: 'monospace', color: '#4a3a1a',
+            textAlign: 'center', whiteSpace: 'nowrap',
+            paddingTop: '4px',
+            borderTop: '1px solid #2e2410',
+          }}>
+            {tick.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Floating tooltip */}
+      {tooltip && (() => {
+        const color = getClusterColor(incidentClusterMap[tooltip.inc.IncidentId] ?? null);
+        const ts = new Date(tooltip.inc.ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return (
+          <div style={{
+            position: 'absolute',
+            left: Math.min(tooltip.x + 14, 800),
+            top: tooltip.y - 4,
+            transform: 'translateY(-100%)',
+            backgroundColor: '#13100a',
+            border: `1px solid ${color}55`,
+            borderRadius: '8px', padding: '10px 14px',
+            fontSize: '12px', maxWidth: '270px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
+            pointerEvents: 'none', zIndex: 100,
+          }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#7a6a4a', marginBottom: '3px' }}>
+              {tooltip.inc.IncidentId} · {ts}
+            </div>
+            <div style={{ color: '#e8dcc8', fontWeight: 600, marginBottom: '5px', lineHeight: 1.4 }}>
+              {tooltip.inc.Title}
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '10px', color: SEVERITY_COLORS[tooltip.inc.Severity] || '#aaa' }}>
+                {tooltip.inc.Severity}
+              </span>
+              {tooltip.inc.Department && (
+                <><span style={{ fontSize: '10px', color: '#5a4a2a' }}>·</span>
+                <span style={{ fontSize: '10px', color: '#7a6a4a' }}>{tooltip.inc.Department}</span></>
+              )}
+            </div>
+            <div style={{ fontSize: '10px', color: '#5a4a2a', marginTop: '4px', fontStyle: 'italic' }}>
+              Click to inspect
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
 
-// ── Severity bars (Few-compliant horizontal) ──────────────────────────────────
+// ── Severity bars ─────────────────────────────────────────────────────────────
 function SeverityBars({ breakdown }) {
   const entries = SEV_ORDER.filter(s => breakdown?.[s] > 0).map(s => ({ sev: s, count: breakdown[s] }));
   if (!entries.length) return null;
@@ -248,7 +284,7 @@ function CampaignCard({ cluster, correlations, allIncidents, highlighted, onMous
   const color = getClusterColor(cluster.id);
   const incidentMap = Object.fromEntries((allIncidents || []).map(i => [i.IncidentId, i]));
 
-  // Compute first/last seen from allIncidents
+  // First / last seen
   const times = cluster.incident_ids
     .map(id => incidentMap[id]?.CreatedTime)
     .filter(Boolean)
@@ -256,8 +292,9 @@ function CampaignCard({ cluster, correlations, allIncidents, highlighted, onMous
     .filter(t => !isNaN(t))
     .sort((a, b) => a - b);
 
-  const firstSeen = times[0] ? new Date(times[0]).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-  const lastSeen  = times[times.length - 1] ? new Date(times[times.length - 1]).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+  const fmt = ts => new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const firstSeen = times[0] ? fmt(times[0]) : null;
+  const lastSeen  = times[times.length - 1] && times[times.length - 1] !== times[0] ? fmt(times[times.length - 1]) : null;
 
   // Affected departments
   const depts = [...new Set(cluster.incident_ids.map(id => incidentMap[id]?.Department).filter(Boolean))];
@@ -298,19 +335,17 @@ function CampaignCard({ cluster, correlations, allIncidents, highlighted, onMous
           </div>
         </div>
 
-        {/* Severity bars — most important signal, prominent position */}
+        {/* Severity breakdown — most critical signal */}
         <SeverityBars breakdown={cluster.severity_breakdown} />
 
         {/* Time window */}
         {firstSeen && (
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'monospace',
+          <div style={{ fontSize: '11px', fontFamily: 'monospace',
             backgroundColor: 'var(--bg-surface)', padding: '6px 10px', borderRadius: '4px',
-            border: '1px solid var(--border)' }}>
+            border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
             <span style={{ color: 'var(--text-primary)' }}>{firstSeen}</span>
-            {lastSeen && lastSeen !== firstSeen && (
-              <> <span style={{ color: 'var(--text-secondary)' }}>→</span> <span style={{ color: 'var(--text-primary)' }}>{lastSeen}</span></>
-            )}
-            <span style={{ marginLeft: '8px', color: 'var(--text-secondary)' }}>({cluster.time_span_hours.toFixed(0)}h)</span>
+            {lastSeen && <> <span>→</span> <span style={{ color: 'var(--text-primary)' }}>{lastSeen}</span></>}
+            <span style={{ marginLeft: '8px' }}>({cluster.time_span_hours.toFixed(0)}h span)</span>
           </div>
         )}
 
@@ -329,7 +364,7 @@ function CampaignCard({ cluster, correlations, allIncidents, highlighted, onMous
           </div>
         )}
 
-        {/* MITRE techniques */}
+        {/* MITRE */}
         {cluster.top_techniques.length > 0 && (
           <div>
             <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MITRE Techniques</div>
@@ -348,7 +383,7 @@ function CampaignCard({ cluster, correlations, allIncidents, highlighted, onMous
           </div>
         )}
 
-        {/* Incident IDs — clickable */}
+        {/* Incident IDs */}
         <div>
           <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Incidents</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
@@ -398,16 +433,14 @@ export default function CampaignsTab({ points, clusters, correlations, allIncide
   if (!clusters) return null;
   const { clusters: clusterList, noise, total_clusters, total_noise } = clusters;
 
-  const handleDotClick = (data) => {
-    if (!data) return;
-    const inc = allIncidents?.find(i => i.IncidentId === data.incidentId);
+  const handleDotClick = (inc) => {
     if (inc) setSelectedIncident(inc);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-      {/* ── Section 1: Campaign Timeline ── */}
+      {/* ── Section 1: Timeline ── */}
       <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
@@ -426,7 +459,7 @@ export default function CampaignsTab({ points, clusters, correlations, allIncide
                     padding: '2px 8px', borderRadius: '4px', cursor: 'default',
                     backgroundColor: highlightCluster === c.id ? color + '20' : 'transparent',
                     border: `1px solid ${highlightCluster === c.id ? color + '60' : 'transparent'}`,
-                    opacity: highlightCluster !== null && highlightCluster !== c.id ? 0.4 : 1,
+                    opacity: highlightCluster !== null && highlightCluster !== c.id ? 0.35 : 1,
                     transition: 'all 0.15s',
                   }}
                 >
@@ -437,12 +470,12 @@ export default function CampaignsTab({ points, clusters, correlations, allIncide
             })}
           </div>
           <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'var(--text-secondary)' }}>
-            Size = severity · Click dot to inspect
+            Dot size = severity · Hover to inspect · Click to open
           </span>
         </div>
 
         <div style={{ padding: '12px 16px 16px' }}>
-          <CampaignTimeline
+          <GanttTimeline
             clusters={clusters}
             allIncidents={allIncidents}
             highlightCluster={highlightCluster}
@@ -453,7 +486,7 @@ export default function CampaignsTab({ points, clusters, correlations, allIncide
         </div>
       </div>
 
-      {/* ── Section 2: Campaign Detail Cards ── */}
+      {/* ── Section 2: Campaign Cards ── */}
       <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
