@@ -321,7 +321,7 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
       }
       return true;
     });
-  }, [pairs, minScore, search, incidentLookup]);
+  }, [pairs, minScore, search, strengthFilter, incidentLookup]);
 
   if (!pairs.length) {
     return (
