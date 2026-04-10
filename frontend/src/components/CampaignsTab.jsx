@@ -62,15 +62,16 @@ function SeverityBars({ breakdown, compact = false }) {
 }
 
 function cohesionVerdict(score) {
-  if (score >= 0.80) return 'Very tightly linked';
-  if (score >= 0.60) return 'Strongly linked';
-  if (score >= 0.40) return 'Moderately linked';
-  return 'Loosely linked';
+  if (score >= 0.85) return { label: 'Confirmed campaign',  color: '#ff7b7b' };
+  if (score >= 0.68) return { label: 'Highly likely',       color: '#fb7185' };
+  if (score >= 0.50) return { label: 'Probable',            color: '#ffaa33' };
+  if (score >= 0.30) return { label: 'Possible',            color: '#f59e0b' };
+  return                    { label: 'Weak signal',         color: '#5a7a9a' };
 }
 
 function CohesionPill({ value }) {
-  const pct   = Math.round(value * 100);
-  const color = value >= 0.7 ? '#ff7b7b' : value >= 0.5 ? '#ffaa33' : '#f59e0b';
+  const pct             = Math.round(value * 100);
+  const { label, color } = cohesionVerdict(value);
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
@@ -79,7 +80,7 @@ function CohesionPill({ value }) {
         </div>
         <span style={{ fontSize: '10px', fontFamily: 'monospace', color }}>{pct}%</span>
       </div>
-      <div style={{ fontSize: '9px', color, opacity: 0.8 }}>{cohesionVerdict(value)}</div>
+      <div style={{ fontSize: '9px', color, opacity: 0.85 }}>{label}</div>
     </div>
   );
 }

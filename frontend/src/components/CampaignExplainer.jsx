@@ -14,10 +14,11 @@ function getClusterColor(clusterId) {
 }
 
 function cohesionVerdict(score) {
-  if (score >= 0.80) return { label: 'Very tightly linked', detail: 'Almost certainly the same threat actor or campaign.' };
-  if (score >= 0.60) return { label: 'Strongly linked',     detail: 'Highly likely coordinated activity from a common source.' };
-  if (score >= 0.40) return { label: 'Moderately linked',   detail: 'Incidents share enough signals to suggest a related campaign.' };
-  return                    { label: 'Loosely linked',      detail: 'Some shared TTPs or infrastructure — monitor for further activity.' };
+  if (score >= 0.85) return { label: 'Confirmed campaign', detail: 'Algorithm is highly certain these incidents share the same threat actor or campaign.' };
+  if (score >= 0.68) return { label: 'Highly likely',      detail: 'Strong evidence of coordinated activity — treat as a confirmed campaign pending investigation.' };
+  if (score >= 0.50) return { label: 'Probable',           detail: 'Incidents share enough signals to warrant treating this as a related campaign.' };
+  if (score >= 0.30) return { label: 'Possible',           detail: 'Some overlap in TTPs or infrastructure — investigate before concluding it is coordinated.' };
+  return                    { label: 'Weak signal',        detail: 'Minimal shared indicators — may be coincidental. Monitor for additional activity.' };
 }
 
 function humanTimeSpan(hours) {
