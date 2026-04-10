@@ -89,7 +89,7 @@ export default function App() {
     fontWeight: 600,
     cursor: 'pointer',
     border: activeTab === tab ? '1px solid var(--accent-blue)' : '1px solid transparent',
-    backgroundColor: activeTab === tab ? 'rgba(0,212,255,0.1)' : 'transparent',
+    backgroundColor: activeTab === tab ? 'rgba(245,158,11,0.1)' : 'transparent',
     color: activeTab === tab ? 'var(--accent-blue)' : 'var(--text-secondary)',
     transition: 'all 0.15s',
     whiteSpace: 'nowrap',

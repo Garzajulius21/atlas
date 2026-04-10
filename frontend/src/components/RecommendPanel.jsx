@@ -1,7 +1,7 @@
 const PRIORITY_STYLES = {
   Critical: { bg: 'rgba(255,68,68,0.12)',  border: 'rgba(255,68,68,0.35)',  text: '#ff7b7b',  dot: '#ff4444' },
   High:     { bg: 'rgba(255,149,0,0.12)',  border: 'rgba(255,149,0,0.35)',  text: '#ffaa33',  dot: '#ff9500' },
-  Medium:   { bg: 'rgba(0,212,255,0.08)',  border: 'rgba(0,212,255,0.25)',  text: '#00d4ff',  dot: '#00d4ff' },
+  Medium:   { bg: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.25)',  text: '#f59e0b',  dot: '#f59e0b' },
   Low:      { bg: 'rgba(90,122,154,0.1)', border: 'rgba(90,122,154,0.25)', text: '#5a7a9a',  dot: '#5a7a9a' },
 };
 

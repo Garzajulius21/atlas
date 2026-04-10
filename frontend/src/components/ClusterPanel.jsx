@@ -3,20 +3,20 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 const SEVERITY_COLORS = {
   High: '#ff7b7b',
   Medium: '#ffaa33',
-  Low: '#00d4ff',
+  Low: '#f59e0b',
   Informational: '#5a7a9a',
 };
 
 const PRIORITY_COLORS = {
   Critical: '#ff4444',
   High: '#ff9500',
-  Medium: '#00d4ff',
+  Medium: '#f59e0b',
   Low: '#5a7a9a',
 };
 
 function CohesionBar({ value }) {
   const pct = Math.round(value * 100);
-  const color = value >= 0.7 ? '#ff7b7b' : value >= 0.5 ? '#ffaa33' : '#00d4ff';
+  const color = value >= 0.7 ? '#ff7b7b' : value >= 0.5 ? '#ffaa33' : '#f59e0b';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{ flex: 1, height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 const SEVERITY_COLORS = {
   High:          { bg: 'rgba(255,68,68,0.15)',  border: 'rgba(255,68,68,0.4)',  text: '#ff7b7b' },
   Medium:        { bg: 'rgba(255,149,0,0.15)',  border: 'rgba(255,149,0,0.4)',  text: '#ffaa33' },
-  Low:           { bg: 'rgba(0,212,255,0.12)',  border: 'rgba(0,212,255,0.35)', text: '#00d4ff' },
+  Low:           { bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.35)', text: '#f59e0b' },
   Informational: { bg: 'rgba(90,122,154,0.15)', border: 'rgba(90,122,154,0.4)', text: '#5a7a9a' },
 };
 
@@ -232,7 +232,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                         <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-mono)' }}>{otherId}</span>
                         <span style={{
                           marginLeft: 'auto', fontSize: '11px', fontFamily: 'monospace', fontWeight: 700,
-                          color: pct >= 70 ? '#ff7b7b' : pct >= 50 ? '#ffaa33' : '#00d4ff'
+                          color: pct >= 70 ? '#ff7b7b' : pct >= 50 ? '#ffaa33' : '#f59e0b'
                         }}>{pct}% match</span>
                       </div>
                       {other && (

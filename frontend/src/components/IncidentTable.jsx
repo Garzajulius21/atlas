@@ -4,7 +4,7 @@ import IncidentDrawer from './IncidentDrawer.jsx';
 const SEVERITY_COLORS = {
   High:          { bg: 'rgba(255,68,68,0.15)',  border: 'rgba(255,68,68,0.4)',  text: '#ff7b7b' },
   Medium:        { bg: 'rgba(255,149,0,0.15)',  border: 'rgba(255,149,0,0.4)',  text: '#ffaa33' },
-  Low:           { bg: 'rgba(0,212,255,0.12)',  border: 'rgba(0,212,255,0.35)', text: '#00d4ff' },
+  Low:           { bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.35)', text: '#f59e0b' },
   Informational: { bg: 'rgba(90,122,154,0.15)', border: 'rgba(90,122,154,0.4)', text: '#5a7a9a' },
 };
 
@@ -101,7 +101,7 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
     padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
     fontFamily: 'monospace', cursor: 'pointer',
     border: active ? '1px solid var(--accent-blue)' : '1px solid var(--border)',
-    backgroundColor: active ? 'rgba(0,212,255,0.1)' : 'transparent',
+    backgroundColor: active ? 'rgba(245,158,11,0.1)' : 'transparent',
     color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
     transition: 'all 0.15s'
   });
@@ -175,10 +175,10 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
                     style={{
                       cursor: 'pointer',
                       backgroundColor: isSelected
-                        ? 'rgba(0,212,255,0.06)'
+                        ? 'rgba(245,158,11,0.06)'
                         : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                       transition: 'background 0.1s',
-                      outline: isSelected ? '1px solid rgba(0,212,255,0.3)' : 'none',
+                      outline: isSelected ? '1px solid rgba(245,158,11,0.3)' : 'none',
                     }}
                     onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
                     onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'; }}

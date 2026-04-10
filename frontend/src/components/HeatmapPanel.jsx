@@ -2,13 +2,13 @@ const SEVERITY_ORDER = ['High', 'Medium', 'Low', 'Informational'];
 const SEVERITY_COLORS = {
   High: '#ff7b7b',
   Medium: '#ffaa33',
-  Low: '#00d4ff',
+  Low: '#f59e0b',
   Informational: '#5a7a9a',
 };
 
 function RiskBar({ score, maxScore }) {
   const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  const color = pct >= 75 ? '#ff4444' : pct >= 50 ? '#ff9500' : pct >= 25 ? '#ffaa33' : '#00d4ff';
+  const color = pct >= 75 ? '#ff4444' : pct >= 50 ? '#ff9500' : pct >= 25 ? '#ffaa33' : '#f59e0b';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px' }}>
