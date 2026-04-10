@@ -264,12 +264,6 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           />
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            {['All', 'High', 'Medium', 'Low', 'Informational'].map(s => (
-              <button key={s} style={filterBtnStyle(severityFilter === s)} onClick={() => handleSev(s)}>{s}</button>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', gap: '4px' }}>
             {['All', 'Active', 'In Progress', 'Resolved', 'Closed'].map(s => (
               <button key={s} style={filterBtnStyle(statusFilter === s)} onClick={() => handleStatus(s)}>{s}</button>
             ))}
