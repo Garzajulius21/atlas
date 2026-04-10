@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis,
-  Tooltip, ResponsiveContainer, Cell
+  Tooltip, ResponsiveContainer, Cell, Customized
 } from 'recharts';
 import IncidentDrawer from './IncidentDrawer.jsx';
 import CampaignExplainer from './CampaignExplainer.jsx';
@@ -28,6 +28,44 @@ function getClusterColor(clusterId) {
   return CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
 }
 
+
+// Rendered inside the Recharts SVG — plot area background + reference rings
+function MapBackground({ x, y, width, height }) {
+  if (!width || !height) return null;
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+  const maxR = Math.min(width, height) / 2;
+
+  return (
+    <g>
+      {/* Plot area background */}
+      <rect
+        x={x} y={y} width={width} height={height}
+        fill="#0e0b07" rx={6}
+      />
+      {/* Border around plot area */}
+      <rect
+        x={x} y={y} width={width} height={height}
+        fill="none" stroke="#2e2410" strokeWidth={1} rx={6}
+      />
+      {/* Concentric reference rings — 25%, 50%, 75% of max radius */}
+      {[0.28, 0.52, 0.76].map((pct, i) => (
+        <circle
+          key={i}
+          cx={cx} cy={cy}
+          r={maxR * pct}
+          fill="none"
+          stroke="#2e2410"
+          strokeWidth={1}
+          strokeDasharray="3 5"
+        />
+      ))}
+      {/* Crosshair at center */}
+      <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} stroke="#2e2410" strokeWidth={1} />
+      <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} stroke="#2e2410" strokeWidth={1} />
+    </g>
+  );
+}
 
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
@@ -186,6 +224,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
               />
               <ZAxis type="number" dataKey="z" range={[40, 140]} />
               <Tooltip content={<CustomTooltip />} cursor={false} />
+              <Customized component={MapBackground} />
 
               {sortedGroups.map(group => {
                 const color = getClusterColor(group.clusterId);
