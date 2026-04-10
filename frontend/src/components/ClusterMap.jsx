@@ -71,39 +71,6 @@ function CustomTooltip({ active, payload }) {
   );
 }
 
-// SVG cluster label rendered at the centroid of each campaign
-function ClusterLabel({ points, label, color, viewBox, xDomain, yDomain }) {
-  if (!points?.length || !viewBox) return null;
-  const c = centroid(points);
-
-  // Map data coords → pixel coords
-  const px = viewBox.x + ((c.x - xDomain[0]) / (xDomain[1] - xDomain[0])) * viewBox.width;
-  const py = viewBox.y + ((yDomain[1] - c.y) / (yDomain[1] - yDomain[0])) * viewBox.height;
-
-  return (
-    <g>
-      <rect
-        x={px - 36} y={py - 11}
-        width={72} height={20}
-        rx={4}
-        fill={color + '22'}
-        stroke={color + '55'}
-        strokeWidth={1}
-      />
-      <text
-        x={px} y={py + 4}
-        textAnchor="middle"
-        fill={color}
-        fontSize={10}
-        fontWeight={700}
-        fontFamily="monospace"
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        {label}
-      </text>
-    </g>
-  );
-}
 
 export default function ClusterMap({ points, clusters, correlations, allIncidents }) {
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -157,7 +124,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
             Campaign Map
           </div>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap', alignItems: 'center' }}>
-            {campaignGroups.map(g => {
+            {sortedGroups.filter(g => g.clusterId !== null).map(g => {
               const isPinned = pinnedCluster === g.clusterId;
               const color = getClusterColor(g.clusterId);
               return (
