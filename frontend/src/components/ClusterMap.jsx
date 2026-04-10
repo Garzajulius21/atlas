@@ -30,22 +30,26 @@ function getClusterColor(clusterId) {
 
 
 // Rendered inside the Recharts SVG — plot area background + reference rings
-function MapBackground({ x, y, width, height }) {
-  if (!width || !height) return null;
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-  const maxR = Math.min(width, height) / 2;
+function MapBackground({ width, height, offset }) {
+  if (!width || !height || !offset) return null;
+  const x = offset.left;
+  const y = offset.top;
+  const w = width - offset.left - offset.right;
+  const h = height - offset.top - offset.bottom;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const maxR = Math.min(w, h) / 2;
 
   return (
     <g>
       {/* Plot area background */}
       <rect
-        x={x} y={y} width={width} height={height}
+        x={x} y={y} width={w} height={h}
         fill="#0e0b07" rx={6}
       />
       {/* Border around plot area */}
       <rect
-        x={x} y={y} width={width} height={height}
+        x={x} y={y} width={w} height={h}
         fill="none" stroke="#2e2410" strokeWidth={1} rx={6}
       />
       {/* Concentric reference rings — 25%, 50%, 75% of max radius */}
