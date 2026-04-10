@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis,
-  Tooltip, ResponsiveContainer, Cell, LabelList
+  Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import IncidentDrawer from './IncidentDrawer.jsx';
 import CampaignExplainer from './CampaignExplainer.jsx';
@@ -28,13 +28,6 @@ function getClusterColor(clusterId) {
   return CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
 }
 
-// Compute centroid x/y for a group of points
-function centroid(points) {
-  if (!points.length) return { x: 0, y: 0 };
-  const sx = points.reduce((s, p) => s + p.x, 0);
-  const sy = points.reduce((s, p) => s + p.y, 0);
-  return { x: sx / points.length, y: sy / points.length };
-}
 
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
@@ -116,8 +109,6 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [highlightCluster, setHighlightCluster] = useState(null);
   const [pinnedCluster, setPinnedCluster] = useState(null);
-  const [chartViewBox, setChartViewBox] = useState(null);
-
   const clusterLookup = Object.fromEntries(
     (clusters?.clusters || []).map(c => [c.id, c])
   );
@@ -142,16 +133,11 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
     return a.clusterId - b.clusterId;
   });
 
-  const campaignGroups = sortedGroups.filter(g => g.clusterId !== null);
-
   const handleDotClick = (data) => {
     if (!data) return;
     const inc = allIncidents?.find(i => i.IncidentId === data.incidentId);
     if (inc) setSelectedIncident(inc);
   };
-
-  // Capture the chart's inner plot area for label positioning
-  const CustomizedDot = () => null; // placeholder to capture viewBox via tick
 
   return (
     <>
@@ -220,17 +206,9 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
         )}
 
         {/* Chart */}
-        <div style={{ padding: '8px 16px 16px', position: 'relative' }}>
+        <div style={{ padding: '8px 16px 16px' }}>
           <ResponsiveContainer width="100%" height={480}>
-            <ScatterChart
-              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              onMouseMove={(state) => {
-                // Capture viewBox from chart state for label positioning
-                if (state?.chartX !== undefined && !chartViewBox) {
-                  // Will be set via customized tick below
-                }
-              }}
-            >
+            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <XAxis
                 type="number" dataKey="x" domain={xDomain}
                 tick={false} axisLine={false} tickLine={false}
@@ -277,36 +255,6 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
             </ScatterChart>
           </ResponsiveContainer>
 
-          {/* SVG overlay for cluster labels */}
-          <svg
-            style={{ position: 'absolute', top: 8, left: 16, pointerEvents: 'none' }}
-            width="100%"
-            height={480}
-          >
-            {campaignGroups.map(group => {
-              const color = getClusterColor(group.clusterId);
-              const c = centroid(group.points);
-              const dimmed = highlightCluster !== null && highlightCluster !== group.clusterId;
-
-              // Rough pixel mapping based on fixed domain [-110,110] and chart area
-              // Account for recharts margins: top=20, right=20, bottom=20, left=20
-              // Plus ~8px left padding from the container
-              const chartW = '100%';
-              const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
-              return (
-                <ClusterLabelSvg
-                  key={group.label}
-                  label={group.label}
-                  color={color}
-                  cx={c.x}
-                  cy={c.y}
-                  domain={[-110, 110]}
-                  dimmed={dimmed}
-                />
-              );
-            })}
-          </svg>
         </div>
       </div>
 
@@ -323,52 +271,3 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
   );
 }
 
-// Renders a campaign label as a percentage-positioned overlay
-function ClusterLabelSvg({ label, color, cx, cy, domain, dimmed }) {
-  // Map data coords [-110,110] to percentage of the plot area
-  // Recharts margins: top=20, right=20, bottom=20, left=20 out of 480px height
-  // We use CSS percentage + absolute positioning approach via foreignObject
-  const xPct = ((cx - domain[0]) / (domain[1] - domain[0])) * 100;
-  const yPct = ((domain[1] - cy) / (domain[1] - domain[0])) * 100;
-
-  // Account for recharts margin as % of total container
-  // For a 480px chart with 20px margins: usable area is 440px, margin is ~4.2%
-  const marginTopPct = (20 / 480) * 100;
-  const marginBotPct = (20 / 480) * 100;
-  const marginLftPct = 3; // approximate left axis margin %
-  const marginRgtPct = 3;
-
-  const adjustedX = marginLftPct + (xPct * (100 - marginLftPct - marginRgtPct)) / 100;
-  const adjustedY = marginTopPct + (yPct * (100 - marginTopPct - marginBotPct)) / 100;
-
-  return (
-    <foreignObject
-      x={`${adjustedX}%`}
-      y={`${adjustedY}%`}
-      width="80"
-      height="22"
-      style={{ overflow: 'visible', opacity: dimmed ? 0.15 : 1, transition: 'opacity 0.15s' }}
-    >
-      <div
-        xmlns="http://www.w3.org/1999/xhtml"
-        style={{
-          transform: 'translate(-50%, -50%)',
-          display: 'inline-block',
-          padding: '2px 8px',
-          borderRadius: '4px',
-          backgroundColor: color + '25',
-          border: `1px solid ${color}60`,
-          fontSize: '10px',
-          fontWeight: 700,
-          fontFamily: 'monospace',
-          color,
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
-        {label}
-      </div>
-    </foreignObject>
-  );
-}
