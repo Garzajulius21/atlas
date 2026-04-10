@@ -9,12 +9,14 @@ const SEVERITY_COLORS = {
   Informational: '#5a7a9a',
 };
 
-const PRIORITY_COLORS = {
-  Critical: '#ff4444',
-  High: '#ff9500',
-  Medium: '#f59e0b',
-  Low: '#5a7a9a',
-};
+const CLUSTER_COLORS = [
+  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
+  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+];
+
+function getClusterColor(clusterId) {
+  return CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
+}
 
 function CohesionBar({ value }) {
   const pct = Math.round(value * 100);
@@ -31,6 +33,7 @@ function CohesionBar({ value }) {
 
 function ClusterCard({ cluster, correlations }) {
   const [showWhy, setShowWhy] = useState(false);
+  const color = getClusterColor(cluster.id);
 
   const sevData = Object.entries(cluster.severity_breakdown)
     .filter(([, v]) => v > 0)
@@ -39,7 +42,7 @@ function ClusterCard({ cluster, correlations }) {
   return (
     <div style={{
       backgroundColor: 'var(--bg-primary)',
-      border: '1px solid var(--border)',
+      border: `1px solid ${color}40`,
       borderRadius: '8px',
       padding: '16px',
       display: 'flex',
@@ -50,9 +53,9 @@ function ClusterCard({ cluster, correlations }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
           width: '32px', height: '32px', borderRadius: '6px',
-          backgroundColor: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.35)',
+          backgroundColor: color + '20', border: `1px solid ${color}50`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '13px', fontWeight: 700, color: '#a855f7', fontFamily: 'monospace'
+          fontSize: '13px', fontWeight: 700, color, fontFamily: 'monospace'
         }}>
           {cluster.id + 1}
         </div>
@@ -93,10 +96,19 @@ function ClusterCard({ cluster, correlations }) {
           <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Techniques</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
             {cluster.top_techniques.map(t => (
-              <span key={t} style={{
-                padding: '2px 7px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
-                backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7'
-              }}>{t}</span>
+              <a
+                key={t}
+                href={`https://attack.mitre.org/techniques/${t.replace('.', '/')}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '2px 7px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
+                  backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
+                  color: '#a855f7', textDecoration: 'none', transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.3)'}
+              >{t} ↗</a>
             ))}
           </div>
         </div>
@@ -117,9 +129,9 @@ function ClusterCard({ cluster, correlations }) {
         style={{
           width: '100%', padding: '7px', borderRadius: '5px', fontSize: '11px',
           fontWeight: 600, cursor: 'pointer', fontFamily: 'monospace',
-          border: '1px solid rgba(168,85,247,0.35)',
-          backgroundColor: showWhy ? 'rgba(168,85,247,0.15)' : 'transparent',
-          color: '#a855f7', transition: 'all 0.15s',
+          border: `1px solid ${color}50`,
+          backgroundColor: showWhy ? color + '20' : 'transparent',
+          color, transition: 'all 0.15s',
         }}
       >
         {showWhy ? '▲ Hide explanation' : '▾ Why were these clustered?'}
