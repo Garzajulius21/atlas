@@ -14,7 +14,7 @@ import numpy as np
 from typing import List, Dict
 from sklearn.cluster import DBSCAN
 
-MIN_CLUSTER_SIZE = int(os.getenv('MIN_CLUSTER_SIZE', 3))
+MIN_CLUSTER_SIZE = int(os.getenv('MIN_CLUSTER_SIZE', 2))
 CORRELATION_THRESHOLD = float(os.getenv('CORRELATION_THRESHOLD', 0.70))
 
 

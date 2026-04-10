@@ -182,7 +182,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
         {/* Legend hint */}
         <div style={{ padding: '10px 20px 0', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-            Dot size = severity &nbsp;·&nbsp; Proximity = correlation strength &nbsp;·&nbsp; Click any dot to inspect
+            Color = campaign membership &nbsp;·&nbsp; Size = severity &nbsp;·&nbsp; Gray = no campaign detected &nbsp;·&nbsp; Click any dot to inspect
           </span>
           {/* Isolated legend swatch */}
           <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', color: 'var(--text-secondary)' }}>
