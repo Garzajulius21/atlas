@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import IncidentDrawer from './IncidentDrawer.jsx';
 
 const SEVERITY_COLORS = {
   High:          { bg: 'rgba(255,68,68,0.15)',  border: 'rgba(255,68,68,0.4)',  text: '#ff7b7b' },
@@ -8,28 +9,21 @@ const SEVERITY_COLORS = {
 };
 
 const STATUS_COLORS = {
-  Active:      { text: '#ff7b7b' },
-  New:         { text: '#ff7b7b' },
-  InProgress:  { text: '#ffaa33' },
+  Active:        { text: '#ff7b7b' },
+  New:           { text: '#ff7b7b' },
+  InProgress:    { text: '#ffaa33' },
   'In Progress': { text: '#ffaa33' },
-  Resolved:    { text: '#00ff88' },
-  Closed:      { text: '#5a7a9a' },
+  Resolved:      { text: '#00ff88' },
+  Closed:        { text: '#5a7a9a' },
 };
 
 function SeverityBadge({ severity }) {
   const c = SEVERITY_COLORS[severity] || SEVERITY_COLORS.Informational;
   return (
     <span style={{
-      display: 'inline-block',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      fontSize: '11px',
-      fontWeight: 600,
-      fontFamily: 'monospace',
-      backgroundColor: c.bg,
-      border: `1px solid ${c.border}`,
-      color: c.text,
-      whiteSpace: 'nowrap'
+      display: 'inline-block', padding: '2px 8px', borderRadius: '4px',
+      fontSize: '11px', fontWeight: 600, fontFamily: 'monospace',
+      backgroundColor: c.bg, border: `1px solid ${c.border}`, color: c.text, whiteSpace: 'nowrap'
     }}>
       {severity}
     </span>
@@ -38,11 +32,7 @@ function SeverityBadge({ severity }) {
 
 function StatusDot({ status }) {
   const c = STATUS_COLORS[status] || { text: 'var(--text-secondary)' };
-  return (
-    <span style={{ color: c.text, fontSize: '12px', fontFamily: 'monospace' }}>
-      {status}
-    </span>
-  );
+  return <span style={{ color: c.text, fontSize: '12px', fontFamily: 'monospace' }}>{status}</span>;
 }
 
 function MitreTags({ techniques }) {
@@ -52,14 +42,9 @@ function MitreTags({ techniques }) {
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
       {tags.map(t => (
         <span key={t} style={{
-          padding: '1px 6px',
-          borderRadius: '3px',
-          fontSize: '10px',
-          fontFamily: 'monospace',
-          backgroundColor: 'rgba(168,85,247,0.12)',
-          border: '1px solid rgba(168,85,247,0.3)',
-          color: '#a855f7',
-          whiteSpace: 'nowrap'
+          padding: '1px 6px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
+          backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
+          color: '#a855f7', whiteSpace: 'nowrap'
         }}>{t}</span>
       ))}
     </div>
@@ -68,34 +53,25 @@ function MitreTags({ techniques }) {
 
 const COL_STYLES = {
   header: {
-    fontSize: '10px',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    color: 'var(--text-secondary)',
-    padding: '10px 12px',
-    textAlign: 'left',
-    borderBottom: '1px solid var(--border)',
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
+    fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
+    letterSpacing: '0.08em', color: 'var(--text-secondary)',
+    padding: '10px 12px', textAlign: 'left',
+    borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', userSelect: 'none',
   },
   cell: {
-    padding: '10px 12px',
-    borderBottom: '1px solid var(--border)',
-    fontSize: '12px',
-    color: 'var(--text-primary)',
-    verticalAlign: 'middle',
+    padding: '10px 12px', borderBottom: '1px solid var(--border)',
+    fontSize: '12px', color: 'var(--text-primary)', verticalAlign: 'middle',
   }
 };
 
 const PAGE_SIZE = 25;
 
-export default function IncidentTable({ incidents }) {
+export default function IncidentTable({ incidents, clusters, correlations }) {
   const [search, setSearch] = useState('');
   const [severityFilter, setSeverityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [page, setPage] = useState(0);
-  const [expanded, setExpanded] = useState(null);
+  const [selectedIncident, setSelectedIncident] = useState(null);
 
   const filtered = useMemo(() => {
     return incidents.filter(inc => {
@@ -122,12 +98,8 @@ export default function IncidentTable({ incidents }) {
   const handleStatus = (v) => { setStatusFilter(v); setPage(0); };
 
   const filterBtnStyle = (active) => ({
-    padding: '4px 10px',
-    borderRadius: '4px',
-    fontSize: '11px',
-    fontWeight: 600,
-    fontFamily: 'monospace',
-    cursor: 'pointer',
+    padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
+    fontFamily: 'monospace', cursor: 'pointer',
     border: active ? '1px solid var(--accent-blue)' : '1px solid var(--border)',
     backgroundColor: active ? 'rgba(0,212,255,0.1)' : 'transparent',
     color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
@@ -135,135 +107,137 @@ export default function IncidentTable({ incidents }) {
   });
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
+    <>
+      <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
 
-      {/* Toolbar */}
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginRight: '4px' }}>
-          Incidents
+        {/* Toolbar */}
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginRight: '4px' }}>
+            Incidents
+          </div>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent-blue)' }}>
+            {filtered.length} / {incidents.length}
+          </span>
+
+          <input
+            type="text"
+            placeholder="Search ID, title, MITRE, dept…"
+            value={search}
+            onChange={e => handleSearch(e.target.value)}
+            style={{
+              flex: 1, minWidth: '180px', maxWidth: '320px', padding: '5px 10px',
+              borderRadius: '5px', border: '1px solid var(--border-hi)',
+              backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)',
+              fontSize: '12px', outline: 'none', fontFamily: 'inherit'
+            }}
+          />
+
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {['All', 'High', 'Medium', 'Low', 'Informational'].map(s => (
+              <button key={s} style={filterBtnStyle(severityFilter === s)} onClick={() => handleSev(s)}>{s}</button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {['All', 'Active', 'InProgress', 'Resolved', 'Closed'].map(s => (
+              <button key={s} style={filterBtnStyle(statusFilter === s)} onClick={() => handleStatus(s)}>{s}</button>
+            ))}
+          </div>
+
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic', marginLeft: 'auto' }}>
+            Click any row to inspect
+          </span>
         </div>
-        <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent-blue)' }}>
-          {filtered.length} / {incidents.length}
-        </span>
 
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search ID, title, MITRE, dept…"
-          value={search}
-          onChange={e => handleSearch(e.target.value)}
-          style={{
-            flex: 1,
-            minWidth: '180px',
-            maxWidth: '320px',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            border: '1px solid var(--border-hi)',
-            backgroundColor: 'var(--bg-input)',
-            color: 'var(--text-primary)',
-            fontSize: '12px',
-            outline: 'none',
-            fontFamily: 'inherit'
-          }}
-        />
-
-        {/* Severity filter */}
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {['All', 'High', 'Medium', 'Low', 'Informational'].map(s => (
-            <button key={s} style={filterBtnStyle(severityFilter === s)} onClick={() => handleSev(s)}>{s}</button>
-          ))}
-        </div>
-
-        {/* Status filter */}
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {['All', 'Active', 'InProgress', 'Resolved', 'Closed'].map(s => (
-            <button key={s} style={filterBtnStyle(statusFilter === s)} onClick={() => handleStatus(s)}>{s}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--bg-primary)' }}>
-              {['ID', 'Title', 'Severity', 'Status', 'Created', 'MITRE Techniques', 'Department', 'Entities'].map(h => (
-                <th key={h} style={COL_STYLES.header}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {pageData.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ ...COL_STYLES.cell, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
-                  No incidents match the current filters.
-                </td>
+        {/* Table */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ backgroundColor: 'var(--bg-primary)' }}>
+                {['ID', 'Title', 'Severity', 'Status', 'Created', 'MITRE Techniques', 'Department', 'Entities'].map(h => (
+                  <th key={h} style={COL_STYLES.header}>{h}</th>
+                ))}
               </tr>
-            ) : pageData.map((inc, i) => {
-              const isExp = expanded === i + page * PAGE_SIZE;
-              return (
-                <tr
-                  key={inc.IncidentId || i}
-                  onClick={() => setExpanded(isExp ? null : i + page * PAGE_SIZE)}
-                  style={{
-                    cursor: 'pointer',
-                    backgroundColor: isExp ? 'rgba(0,212,255,0.04)' : (i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'),
-                    transition: 'background 0.1s'
-                  }}
-                >
-                  <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-mono)', whiteSpace: 'nowrap' }}>
-                    {inc.IncidentId || '—'}
-                  </td>
-                  <td style={{ ...COL_STYLES.cell, maxWidth: '280px' }}>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExp ? 'normal' : 'nowrap' }}>
-                      {inc.Title || '—'}
-                    </div>
-                  </td>
-                  <td style={COL_STYLES.cell}>
-                    <SeverityBadge severity={inc.Severity} />
-                  </td>
-                  <td style={COL_STYLES.cell}>
-                    <StatusDot status={inc.Status} />
-                  </td>
-                  <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                    {inc.CreatedTime ? inc.CreatedTime.slice(0, 16).replace('T', ' ') : '—'}
-                  </td>
-                  <td style={{ ...COL_STYLES.cell, maxWidth: '220px' }}>
-                    <MitreTags techniques={inc.MitreTechniques} />
-                  </td>
-                  <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    {inc.Department || '—'}
-                  </td>
-                  <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)' }}>
-                    <div>{inc.AccountUpn && <div>USR: {inc.AccountUpn}</div>}</div>
-                    <div>{inc.DeviceName && <div>HOST: {inc.DeviceName}</div>}</div>
-                    <div>{inc.IpAddress && <div>IP: {inc.IpAddress}</div>}</div>
+            </thead>
+            <tbody>
+              {pageData.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ ...COL_STYLES.cell, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
+                    No incidents match the current filters.
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ) : pageData.map((inc, i) => {
+                const isSelected = selectedIncident?.IncidentId === inc.IncidentId;
+                return (
+                  <tr
+                    key={inc.IncidentId || i}
+                    onClick={() => setSelectedIncident(inc)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: isSelected
+                        ? 'rgba(0,212,255,0.06)'
+                        : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
+                      transition: 'background 0.1s',
+                      outline: isSelected ? '1px solid rgba(0,212,255,0.3)' : 'none',
+                    }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
+                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'; }}
+                  >
+                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-mono)', whiteSpace: 'nowrap' }}>
+                      {inc.IncidentId || '—'}
+                    </td>
+                    <td style={{ ...COL_STYLES.cell, maxWidth: '280px' }}>
+                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {inc.Title || '—'}
+                      </div>
+                    </td>
+                    <td style={COL_STYLES.cell}><SeverityBadge severity={inc.Severity} /></td>
+                    <td style={COL_STYLES.cell}><StatusDot status={inc.Status} /></td>
+                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                      {inc.CreatedTime ? inc.CreatedTime.slice(0, 16).replace('T', ' ') : '—'}
+                    </td>
+                    <td style={{ ...COL_STYLES.cell, maxWidth: '220px' }}>
+                      <MitreTags techniques={inc.MitreTechniques} />
+                    </td>
+                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      {inc.Department || '—'}
+                    </td>
+                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)' }}>
+                      {inc.AccountUpn && <div>USR: {inc.AccountUpn}</div>}
+                      {inc.DeviceName && <div>HOST: {inc.DeviceName}</div>}
+                      {inc.IpAddress && <div>IP: {inc.IpAddress}</div>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginRight: 'auto' }}>
+              Page {page + 1} of {totalPages} · rows {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)}
+            </span>
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+              style={{ ...filterBtnStyle(false), opacity: page === 0 ? 0.4 : 1 }}>← Prev</button>
+            <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+              style={{ ...filterBtnStyle(false), opacity: page >= totalPages - 1 ? 0.4 : 1 }}>Next →</button>
+          </div>
+        )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginRight: 'auto' }}>
-            Page {page + 1} of {totalPages} · rows {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            style={{ ...filterBtnStyle(false), opacity: page === 0 ? 0.4 : 1 }}
-          >← Prev</button>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            style={{ ...filterBtnStyle(false), opacity: page >= totalPages - 1 ? 0.4 : 1 }}
-          >Next →</button>
-        </div>
+      {/* Drawer */}
+      {selectedIncident && (
+        <IncidentDrawer
+          incident={selectedIncident}
+          clusters={clusters}
+          correlations={correlations}
+          allIncidents={incidents}
+          onClose={() => setSelectedIncident(null)}
+        />
       )}
-    </div>
+    </>
   );
 }

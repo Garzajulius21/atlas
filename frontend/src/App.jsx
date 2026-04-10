@@ -16,6 +16,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('Incidents');
 
   const [clusters, setClusters] = useState(null);
+  const [correlations, setCorrelations] = useState(null);
   const [mitre, setMitre] = useState(null);
   const [heatmap, setHeatmap] = useState(null);
   const [recommendations, setRecommendations] = useState(null);
@@ -26,6 +27,7 @@ export default function App() {
     setIncidents([]);
     setStats(null);
     setClusters(null);
+    setCorrelations(null);
     setMitre(null);
     setHeatmap(null);
     setRecommendations(null);
@@ -45,17 +47,19 @@ export default function App() {
       setStats(data.stats);
 
       // Fetch all analysis data in parallel
-      const [incRes, clusterRes, mitreRes, heatmapRes, recRes] = await Promise.all([
+      const [incRes, clusterRes, corrRes, mitreRes, heatmapRes, recRes] = await Promise.all([
         fetch('/api/incidents'),
         fetch('/api/clusters'),
+        fetch('/api/correlations'),
         fetch('/api/mitre'),
         fetch('/api/heatmap'),
         fetch('/api/recommendations'),
       ]);
 
-      const [incData, clusterData, mitreData, heatmapData, recData] = await Promise.all([
+      const [incData, clusterData, corrData, mitreData, heatmapData, recData] = await Promise.all([
         incRes.json(),
         clusterRes.json(),
+        corrRes.json(),
         mitreRes.json(),
         heatmapRes.json(),
         recRes.json(),
@@ -63,6 +67,7 @@ export default function App() {
 
       setIncidents(incData.records || []);
       setClusters(clusterData);
+      setCorrelations(corrData);
       setMitre(mitreData);
       setHeatmap(heatmapData);
       setRecommendations(recData);
@@ -160,7 +165,7 @@ export default function App() {
             </div>
 
             {/* Tab content */}
-            {activeTab === 'Incidents' && <IncidentTable incidents={incidents} />}
+            {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
             {activeTab === 'Campaigns' && <ClusterPanel data={clusters} />}
             {activeTab === 'MITRE' && <MitrePanel data={mitre} />}
             {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}
