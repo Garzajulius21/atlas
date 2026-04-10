@@ -127,9 +127,16 @@ function IncidentCard({ incident, clusters, correlations, allIncidents, side }) 
 
 function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
   const [expanded, setExpanded] = useState(false);
-  const sc = pair.score;
-  const col = scoreColor(sc);
+  const sc    = pair.score;
+  const col   = scoreColor(sc);
   const delta = timeDeltaLabel(incA?.CreatedTime, incB?.CreatedTime);
+
+  // Campaign context for collapsed row
+  const clusterList = clusters?.clusters || [];
+  const campA = clusterList.find(c => c.incident_ids?.includes(pair.a));
+  const campB = clusterList.find(c => c.incident_ids?.includes(pair.b));
+  const sameCampaign = campA && campB && campA.id === campB.id;
+  const crossCampaign = campA && campB && campA.id !== campB.id;
 
   return (
     <div style={{
@@ -195,6 +202,20 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
           {delta && (
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', padding: '2px 7px', borderRadius: '3px', border: '1px solid var(--border)' }}>
               {delta}
+            </span>
+          )}
+          {sameCampaign && (
+            <span style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 600, padding: '2px 7px', borderRadius: '3px',
+              backgroundColor: getClusterColor(campA.id) + '20', border: `1px solid ${getClusterColor(campA.id)}50`,
+              color: getClusterColor(campA.id) }}>
+              Same campaign
+            </span>
+          )}
+          {crossCampaign && (
+            <span style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 600, padding: '2px 7px', borderRadius: '3px',
+              backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)',
+              color: 'var(--text-secondary)' }}>
+              Cross-campaign
             </span>
           )}
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '4px' }}>
@@ -269,8 +290,9 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
 }
 
 export default function CorrelationExplorer({ correlations, allIncidents, clusters }) {
-  const [minScore, setMinScore] = useState(35);
-  const [search, setSearch] = useState('');
+  const [minScore, setMinScore]       = useState(35);
+  const [search, setSearch]           = useState('');
+  const [strengthFilter, setStrengthFilter] = useState(null); // 'verystrong'|'strong'|'moderate'|null
 
   const incidentLookup = useMemo(() => {
     const map = {};
@@ -284,6 +306,9 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
     const threshold = minScore / 100;
     return pairs.filter(p => {
       if (p.score < threshold) return false;
+      if (strengthFilter === 'verystrong' && p.score < 0.75) return false;
+      if (strengthFilter === 'strong'     && (p.score < 0.55 || p.score >= 0.75)) return false;
+      if (strengthFilter === 'moderate'   && (p.score < 0.40 || p.score >= 0.55)) return false;
       if (search) {
         const q = search.toLowerCase();
         const a = incidentLookup[p.a];
@@ -337,18 +362,31 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
           </div>
         </div>
 
-        {/* Strength breakdown */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        {/* Strength breakdown — clickable filters */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
-            { label: 'Very Strong', count: veryStrong, color: '#ff7b7b' },
-            { label: 'Strong', count: strong, color: '#f59e0b' },
-            { label: 'Moderate', count: moderate, color: '#38bdf8' },
-          ].map(({ label, count, color }) => (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'monospace', color }}>{count}</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{label}</div>
-            </div>
-          ))}
+            { label: 'Very Strong', key: 'verystrong', count: veryStrong, color: '#ff7b7b' },
+            { label: 'Strong',      key: 'strong',     count: strong,     color: '#f59e0b' },
+            { label: 'Moderate',    key: 'moderate',   count: moderate,   color: '#38bdf8' },
+          ].map(({ label, key, count, color }) => {
+            const active = strengthFilter === key;
+            return (
+              <button key={key}
+                onClick={() => setStrengthFilter(active ? null : key)}
+                style={{
+                  textAlign: 'center', cursor: 'pointer', padding: '6px 12px',
+                  borderRadius: '6px', border: `1px solid ${active ? color + '80' : 'var(--border)'}`,
+                  backgroundColor: active ? color + '15' : 'transparent',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = color + '50'; }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)'; }}
+              >
+                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'monospace', color }}>{count}</div>
+                <div style={{ fontSize: '10px', color: active ? color : 'var(--text-secondary)' }}>{label}</div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Controls */}
@@ -403,7 +441,7 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
       </div>
 
       <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'center', paddingBottom: '8px' }}>
-        Scores weighted: 45% MITRE technique overlap · 30% shared entities · 15% time proximity · 10% severity match
+        Scores weighted: 35% shared entities · 30% MITRE technique overlap · 25% time proximity · 10% severity match
       </div>
     </div>
   );
