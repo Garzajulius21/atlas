@@ -15,7 +15,7 @@ from typing import List, Dict
 from sklearn.cluster import DBSCAN
 
 MIN_CLUSTER_SIZE = int(os.getenv('MIN_CLUSTER_SIZE', 3))
-CORRELATION_THRESHOLD = float(os.getenv('CORRELATION_THRESHOLD', 0.65))
+CORRELATION_THRESHOLD = float(os.getenv('CORRELATION_THRESHOLD', 0.70))
 
 
 def _similarity_to_distance(matrix: List[List[float]]) -> np.ndarray:
