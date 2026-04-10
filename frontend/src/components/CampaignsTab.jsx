@@ -109,7 +109,7 @@ function CampaignRow({ cluster, correlations, allIncidents, isExpanded, onToggle
         onClick={onToggle}
         style={{
           display: 'grid',
-          gridTemplateColumns: '4px 44px 1fr 140px 150px 110px 96px 32px',
+          gridTemplateColumns: '4px 44px 1fr 140px 150px 96px 110px 32px',
           alignItems: 'center',
           gap: '0',
           cursor: 'pointer',
@@ -173,12 +173,6 @@ function CampaignRow({ cluster, correlations, allIncidents, isExpanded, onToggle
           )}
         </div>
 
-        {/* Cohesion */}
-        <div style={{ padding: '0 8px' }}>
-          <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cohesion</div>
-          <CohesionPill value={cluster.cohesion} />
-        </div>
-
         {/* Incident count */}
         <div style={{ padding: '0 8px', textAlign: 'center' }}>
           <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'monospace', color, lineHeight: 1 }}>
@@ -187,6 +181,12 @@ function CampaignRow({ cluster, correlations, allIncidents, isExpanded, onToggle
           <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '2px' }}>
             incident{cluster.size !== 1 ? 's' : ''}
           </div>
+        </div>
+
+        {/* Confidence */}
+        <div style={{ padding: '0 8px' }}>
+          <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Confidence</div>
+          <CohesionPill value={cluster.cohesion} />
         </div>
 
         {/* Expand toggle */}
@@ -333,7 +333,7 @@ export default function CampaignsTab({ clusters, correlations, allIncidents }) {
         {/* Table header */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '4px 44px 1fr 140px 150px 110px 96px 32px',
+          gridTemplateColumns: '4px 44px 1fr 140px 150px 96px 110px 32px',
           gap: '0',
           padding: '10px 0',
           borderBottom: '1px solid var(--border)',
@@ -344,8 +344,8 @@ export default function CampaignsTab({ clusters, correlations, allIncidents }) {
           <div style={{ padding: '0 12px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Campaign</div>
           <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Severity</div>
           <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Time Window</div>
-          <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Cohesion</div>
-          <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>Count</div>
+          <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>Incidents</div>
+          <div style={{ padding: '0 8px', fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Confidence</div>
           <div />
         </div>
 
