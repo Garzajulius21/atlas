@@ -140,7 +140,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
                     opacity: highlightCluster !== null && highlightCluster !== g.clusterId ? 0.4 : 1,
                   }}
                 >
-                  {g.label} ({g.points.length}) {isPinned ? '▾' : '?'}
+                  {g.label} · {isPinned ? 'Hide Intel ▲' : 'Campaign Intel ▾'}
                 </button>
               );
             })}
