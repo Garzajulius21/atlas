@@ -30,18 +30,21 @@ function humanTimeSpan(hours) {
 function getSharedEntities(cluster, correlations) {
   if (!correlations?.pairs) return [];
   const ids = new Set(cluster.incident_ids);
-  const entityCount = {};
+  // Count distinct incidents (not pairs) each entity appears in
+  const entityIncidents = {};
   for (const pair of correlations.pairs) {
     if (ids.has(pair.a) && ids.has(pair.b)) {
       for (const e of (pair.shared_entities || [])) {
-        entityCount[e] = (entityCount[e] || 0) + 1;
+        if (!entityIncidents[e]) entityIncidents[e] = new Set();
+        entityIncidents[e].add(pair.a);
+        entityIncidents[e].add(pair.b);
       }
     }
   }
-  return Object.entries(entityCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([entity, count]) => ({ entity, count }));
+  return Object.entries(entityIncidents)
+    .map(([entity, incSet]) => ({ entity, count: incSet.size }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
 }
 
 function Tag({ children, color = '#f59e0b' }) {
