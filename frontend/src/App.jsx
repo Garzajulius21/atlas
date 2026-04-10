@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import UploadPanel from './components/UploadPanel.jsx';
 import IncidentTable from './components/IncidentTable.jsx';
-import ClusterPanel from './components/ClusterPanel.jsx';
-import ClusterMap from './components/ClusterMap.jsx';
+import CampaignsTab from './components/CampaignsTab.jsx';
 import HeatmapPanel from './components/HeatmapPanel.jsx';
 import MitrePanel from './components/MitrePanel.jsx';
 import RecommendPanel from './components/RecommendPanel.jsx';
@@ -10,7 +9,7 @@ import ExportButton from './components/ExportButton.jsx';
 import CorrelationExplorer from './components/CorrelationExplorer.jsx';
 import SkeletonLoader from './components/SkeletonLoader.jsx';
 
-const TABS = ['Incidents', 'Campaign Map', 'Campaigns', 'MITRE', 'Correlations', 'Risk Heatmap', 'Recommendations'];
+const TABS = ['Incidents', 'Campaigns', 'MITRE', 'Correlations', 'Risk Heatmap', 'Recommendations'];
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
@@ -199,8 +198,7 @@ export default function App() {
             ) : (
               <div key={activeTab} className="tab-content">
                 {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
-                {activeTab === 'Campaign Map' && <ClusterMap points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
-                {activeTab === 'Campaigns' && <ClusterPanel data={clusters} correlations={correlations} allIncidents={incidents} />}
+                {activeTab === 'Campaigns' && <CampaignsTab points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
                 {activeTab === 'MITRE' && <MitrePanel data={mitre} allIncidents={incidents} clusters={clusters} correlations={correlations} />}
                 {activeTab === 'Correlations' && <CorrelationExplorer correlations={correlations} allIncidents={incidents} clusters={clusters} />}
                 {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}
