@@ -2,11 +2,12 @@ import { useState } from 'react';
 import UploadPanel from './components/UploadPanel.jsx';
 import IncidentTable from './components/IncidentTable.jsx';
 import ClusterPanel from './components/ClusterPanel.jsx';
+import ClusterMap from './components/ClusterMap.jsx';
 import HeatmapPanel from './components/HeatmapPanel.jsx';
 import MitrePanel from './components/MitrePanel.jsx';
 import RecommendPanel from './components/RecommendPanel.jsx';
 
-const TABS = ['Incidents', 'Campaigns', 'MITRE', 'Risk Heatmap', 'Recommendations'];
+const TABS = ['Incidents', 'Campaign Map', 'Campaigns', 'MITRE', 'Risk Heatmap', 'Recommendations'];
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
@@ -17,6 +18,7 @@ export default function App() {
 
   const [clusters, setClusters] = useState(null);
   const [correlations, setCorrelations] = useState(null);
+  const [clusterMapPoints, setClusterMapPoints] = useState(null);
   const [mitre, setMitre] = useState(null);
   const [heatmap, setHeatmap] = useState(null);
   const [recommendations, setRecommendations] = useState(null);
@@ -28,6 +30,7 @@ export default function App() {
     setStats(null);
     setClusters(null);
     setCorrelations(null);
+    setClusterMapPoints(null);
     setMitre(null);
     setHeatmap(null);
     setRecommendations(null);
@@ -47,19 +50,21 @@ export default function App() {
       setStats(data.stats);
 
       // Fetch all analysis data in parallel
-      const [incRes, clusterRes, corrRes, mitreRes, heatmapRes, recRes] = await Promise.all([
+      const [incRes, clusterRes, corrRes, mapRes, mitreRes, heatmapRes, recRes] = await Promise.all([
         fetch('/api/incidents'),
         fetch('/api/clusters'),
         fetch('/api/correlations'),
+        fetch('/api/cluster-map'),
         fetch('/api/mitre'),
         fetch('/api/heatmap'),
         fetch('/api/recommendations'),
       ]);
 
-      const [incData, clusterData, corrData, mitreData, heatmapData, recData] = await Promise.all([
+      const [incData, clusterData, corrData, mapData, mitreData, heatmapData, recData] = await Promise.all([
         incRes.json(),
         clusterRes.json(),
         corrRes.json(),
+        mapRes.json(),
         mitreRes.json(),
         heatmapRes.json(),
         recRes.json(),
@@ -68,6 +73,7 @@ export default function App() {
       setIncidents(incData.records || []);
       setClusters(clusterData);
       setCorrelations(corrData);
+      setClusterMapPoints(mapData.points || []);
       setMitre(mitreData);
       setHeatmap(heatmapData);
       setRecommendations(recData);
@@ -166,6 +172,7 @@ export default function App() {
 
             {/* Tab content */}
             {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
+            {activeTab === 'Campaign Map' && <ClusterMap points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
             {activeTab === 'Campaigns' && <ClusterPanel data={clusters} />}
             {activeTab === 'MITRE' && <MitrePanel data={mitre} />}
             {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}

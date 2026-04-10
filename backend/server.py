@@ -18,6 +18,7 @@ from lib.cluster import cluster_incidents
 from lib.mitre import analyse_mitre
 from lib.heatmap import build_heatmap
 from lib.recommend import generate_recommendations
+from lib.clustermap import build_cluster_map
 
 app = Flask(__name__)
 CORS(app, origins=['http://localhost:5174', 'http://127.0.0.1:5174'])
@@ -30,10 +31,11 @@ _session = {
     'stats': {},
     'matrix': [],
     'clusters': {},
+    'correlations': [],
+    'cluster_map': [],
     'mitre': {},
     'heatmap': {},
     'recommendations': [],
-    'correlations': [],
 }
 
 
@@ -48,6 +50,7 @@ def _run_analysis():
 
     _session['clusters'] = cluster_incidents(records, matrix)
     _session['correlations'] = top_correlations(records, matrix, threshold=CORRELATION_THRESHOLD)
+    _session['cluster_map'] = build_cluster_map(records, matrix, _session['clusters'])
     _session['mitre'] = analyse_mitre(records)
     _session['heatmap'] = build_heatmap(records)
     _session['recommendations'] = generate_recommendations(
@@ -126,6 +129,14 @@ def clusters():
     if not _session['records']:
         return jsonify({'error': 'No data loaded.'}), 404
     return jsonify(_session['clusters'])
+
+
+@app.route('/api/cluster-map', methods=['GET'])
+def cluster_map():
+    """Return 2D MDS coordinates for the cluster scatter plot."""
+    if not _session['records']:
+        return jsonify({'error': 'No data loaded.'}), 404
+    return jsonify({'points': _session['cluster_map']})
 
 
 @app.route('/api/correlations', methods=['GET'])
