@@ -38,8 +38,8 @@ function GanttTimeline({ clusters, allIncidents, highlightCluster, setHighlightC
 
   const incidentMap = Object.fromEntries((allIncidents || []).map(i => [i.IncidentId, i]));
 
-  // Build one lane per campaign
-  const lanes = campaignList.map(c => ({
+  // Build one lane per campaign — sorted by id so Campaign 1 is always first
+  const lanes = [...campaignList].sort((a, b) => a.id - b.id).map(c => ({
     id: c.id,
     label: c.label,
     color: getClusterColor(c.id),
@@ -152,10 +152,11 @@ function GanttTimeline({ clusters, allIncidents, highlightCluster, setHighlightC
                 }} />
               )}
 
-              {/* Incident dots */}
+              {/* Incident dots — large transparent hit area wraps small visual dot */}
               {lane.incidents.map((inc) => {
                 const size = DOT_SIZES[inc.Severity] || 11;
                 const isSelected = selectedIncidentId === inc.IncidentId;
+                const color = lane.isIsolated ? ISOLATED_COLOR : lane.color;
                 return (
                   <div
                     key={inc.IncidentId}
@@ -166,19 +167,32 @@ function GanttTimeline({ clusters, allIncidents, highlightCluster, setHighlightC
                       position: 'absolute',
                       left: toPct(inc.ts), top: '50%',
                       transform: 'translate(-50%, -50%)',
-                      width: size, height: size,
-                      borderRadius: '50%',
-                      backgroundColor: lane.isIsolated ? ISOLATED_COLOR : lane.color,
-                      opacity: lane.isIsolated ? 0.45 : 0.9,
-                      border: isSelected ? '2px solid #ffffff' : `1.5px solid ${lane.isIsolated ? '#888' : lane.color}`,
-                      boxShadow: isSelected ? `0 0 0 3px ${lane.color}50` : `0 0 6px ${lane.color}50`,
+                      width: 32, height: 32, // large transparent hit area
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: 'pointer',
                       zIndex: isSelected ? 10 : 2,
-                      transition: 'transform 0.1s, box-shadow 0.1s',
                     }}
-                    onMouseOver={e => { e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.35)'; e.currentTarget.style.zIndex = 20; }}
-                    onMouseOut={e => { e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)'; e.currentTarget.style.zIndex = isSelected ? 10 : 2; }}
-                  />
+                    onMouseOver={e => {
+                      const dot = e.currentTarget.querySelector('.dot');
+                      if (dot) dot.style.transform = 'scale(1.4)';
+                      e.currentTarget.style.zIndex = 20;
+                    }}
+                    onMouseOut={e => {
+                      const dot = e.currentTarget.querySelector('.dot');
+                      if (dot) dot.style.transform = 'scale(1)';
+                      e.currentTarget.style.zIndex = isSelected ? 10 : 2;
+                    }}
+                  >
+                    <div className="dot" style={{
+                      width: size, height: size,
+                      borderRadius: '50%',
+                      backgroundColor: color,
+                      opacity: lane.isIsolated ? 0.5 : 0.92,
+                      border: isSelected ? '2px solid #ffffff' : `1.5px solid ${color}`,
+                      boxShadow: isSelected ? `0 0 0 3px ${color}50` : `0 0 7px ${color}60`,
+                      transition: 'transform 0.1s',
+                    }} />
+                  </div>
                 );
               })}
             </div>
@@ -202,16 +216,17 @@ function GanttTimeline({ clusters, allIncidents, highlightCluster, setHighlightC
         ))}
       </div>
 
-      {/* Floating tooltip */}
+      {/* Floating tooltip — flips below dot when near the top */}
       {tooltip && (() => {
         const color = getClusterColor(incidentClusterMap[tooltip.inc.IncidentId] ?? null);
         const ts = new Date(tooltip.inc.ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const showBelow = tooltip.y < 130; // not enough room above — flip down
         return (
           <div style={{
             position: 'absolute',
             left: Math.min(tooltip.x + 14, 800),
-            top: tooltip.y - 4,
-            transform: 'translateY(-100%)',
+            top: showBelow ? tooltip.y + 20 : tooltip.y - 4,
+            transform: showBelow ? 'none' : 'translateY(-100%)',
             backgroundColor: '#13100a',
             border: `1px solid ${color}55`,
             borderRadius: '8px', padding: '10px 14px',
