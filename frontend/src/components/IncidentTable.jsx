@@ -224,7 +224,7 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           </div>
 
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic', marginLeft: 'auto' }}>
-            Click any row to inspect
+            Sorted by newest · click any row to inspect
           </span>
         </div>
 
@@ -323,10 +323,27 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
                       {inc.Department || '—'}
                     </td>
                     {/* Entities */}
-                    <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)' }}>
-                      {inc.AccountUpn && <div>USR: {String(inc.AccountUpn).slice(0, 8)}…</div>}
-                      {inc.DeviceName && <div>HOST: {String(inc.DeviceName).slice(0, 8)}…</div>}
-                      {inc.IpAddress && <div>IP: {String(inc.IpAddress).slice(0, 8)}…</div>}
+                    <td style={{ ...CELL }}>
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {(inc.AccountUpn || inc.AccountName) && (
+                          <span title="User account" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', whiteSpace: 'nowrap' }}>
+                            USR
+                          </span>
+                        )}
+                        {(inc.DeviceName || inc.HostName) && (
+                          <span title="Host / device" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8', whiteSpace: 'nowrap' }}>
+                            HOST
+                          </span>
+                        )}
+                        {(inc.IpAddress || inc.RemoteIP || inc.SourceIp || inc.DestinationIp) && (
+                          <span title="IP address" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)', color: '#a855f7', whiteSpace: 'nowrap' }}>
+                            IP
+                          </span>
+                        )}
+                        {!inc.AccountUpn && !inc.AccountName && !inc.DeviceName && !inc.HostName && !inc.IpAddress && !inc.RemoteIP && (
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>—</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

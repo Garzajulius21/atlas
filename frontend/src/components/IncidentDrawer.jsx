@@ -88,7 +88,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
 
   const relatedPairs = (correlations?.pairs || [])
     .filter(p => p.a === incId || p.b === incId)
-    .slice(0, 8);
+    .sort((a, b) => b.score - a.score);
 
   const incidentMap = Object.fromEntries((allIncidents || []).map(i => [i.IncidentId, i]));
 
