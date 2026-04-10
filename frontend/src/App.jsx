@@ -200,7 +200,7 @@ export default function App() {
               <div key={activeTab} className="tab-content">
                 {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
                 {activeTab === 'Campaign Map' && <ClusterMap points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
-                {activeTab === 'Campaigns' && <ClusterPanel data={clusters} correlations={correlations} />}
+                {activeTab === 'Campaigns' && <ClusterPanel data={clusters} correlations={correlations} allIncidents={incidents} />}
                 {activeTab === 'MITRE' && <MitrePanel data={mitre} allIncidents={incidents} clusters={clusters} correlations={correlations} />}
                 {activeTab === 'Correlations' && <CorrelationExplorer correlations={correlations} allIncidents={incidents} clusters={clusters} />}
                 {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}
