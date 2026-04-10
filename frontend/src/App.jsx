@@ -8,6 +8,7 @@ import MitrePanel from './components/MitrePanel.jsx';
 import RecommendPanel from './components/RecommendPanel.jsx';
 import ExportButton from './components/ExportButton.jsx';
 import CorrelationExplorer from './components/CorrelationExplorer.jsx';
+import SkeletonLoader from './components/SkeletonLoader.jsx';
 
 const TABS = ['Incidents', 'Campaign Map', 'Campaigns', 'MITRE', 'Correlations', 'Risk Heatmap', 'Recommendations'];
 
@@ -159,26 +160,30 @@ export default function App() {
 
         <UploadPanel onUpload={handleUpload} loading={loading} stats={stats} error={error} />
 
-        {hasData && (
+        {(hasData || loading) && (
           <>
             {/* Tab bar */}
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {TABS.map(tab => (
-                <button key={tab} style={tabStyle(tab)} onClick={() => setActiveTab(tab)}>
+                <button
+                  key={tab}
+                  style={{ ...tabStyle(tab), opacity: loading ? 0.5 : 1 }}
+                  onClick={() => !loading && setActiveTab(tab)}
+                >
                   {tab}
-                  {tab === 'Campaigns' && clusters?.total_clusters > 0 &&
+                  {!loading && tab === 'Campaigns' && clusters?.total_clusters > 0 &&
                     <span style={{ marginLeft: '6px', fontSize: '10px', fontFamily: 'monospace',
                       backgroundColor: 'rgba(168,85,247,0.2)', color: '#a855f7',
                       padding: '1px 5px', borderRadius: '3px' }}>
                       {clusters.total_clusters}
                     </span>}
-                  {tab === 'Correlations' && correlations?.total > 0 &&
+                  {!loading && tab === 'Correlations' && correlations?.total > 0 &&
                     <span style={{ marginLeft: '6px', fontSize: '10px', fontFamily: 'monospace',
                       backgroundColor: 'rgba(56,189,248,0.2)', color: '#38bdf8',
                       padding: '1px 5px', borderRadius: '3px' }}>
                       {correlations.total}
                     </span>}
-                  {tab === 'Recommendations' && recommendations?.total > 0 &&
+                  {!loading && tab === 'Recommendations' && recommendations?.total > 0 &&
                     <span style={{ marginLeft: '6px', fontSize: '10px', fontFamily: 'monospace',
                       backgroundColor: 'rgba(255,68,68,0.2)', color: '#ff7b7b',
                       padding: '1px 5px', borderRadius: '3px' }}>
@@ -188,14 +193,20 @@ export default function App() {
               ))}
             </div>
 
-            {/* Tab content */}
-            {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
-            {activeTab === 'Campaign Map' && <ClusterMap points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
-            {activeTab === 'Campaigns' && <ClusterPanel data={clusters} correlations={correlations} />}
-            {activeTab === 'MITRE' && <MitrePanel data={mitre} allIncidents={incidents} clusters={clusters} correlations={correlations} />}
-            {activeTab === 'Correlations' && <CorrelationExplorer correlations={correlations} allIncidents={incidents} clusters={clusters} />}
-            {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}
-            {activeTab === 'Recommendations' && <RecommendPanel data={recommendations} />}
+            {/* Tab content — skeleton while loading, real content when ready */}
+            {loading ? (
+              <SkeletonLoader tab={activeTab} />
+            ) : (
+              <div key={activeTab} className="tab-content">
+                {activeTab === 'Incidents' && <IncidentTable incidents={incidents} clusters={clusters} correlations={correlations} />}
+                {activeTab === 'Campaign Map' && <ClusterMap points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
+                {activeTab === 'Campaigns' && <ClusterPanel data={clusters} correlations={correlations} />}
+                {activeTab === 'MITRE' && <MitrePanel data={mitre} allIncidents={incidents} clusters={clusters} correlations={correlations} />}
+                {activeTab === 'Correlations' && <CorrelationExplorer correlations={correlations} allIncidents={incidents} clusters={clusters} />}
+                {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} />}
+                {activeTab === 'Recommendations' && <RecommendPanel data={recommendations} />}
+              </div>
+            )}
           </>
         )}
 

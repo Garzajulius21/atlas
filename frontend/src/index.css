@@ -30,3 +30,24 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes atlas-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content {
+  animation: atlas-fade-in 0.18s ease-out both;
+}
+
+.skeleton-block {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #1a1508 25%, #2a1f0d 50%, #1a1508 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
