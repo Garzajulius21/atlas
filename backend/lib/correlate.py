@@ -85,11 +85,12 @@ def build_correlation_matrix(records: List[Dict]) -> List[List[float]]:
             sev_sim    = 1.0 - abs(sev_w[i] - sev_w[j])
 
             # Weighted combination
-            # MITRE overlap is strongest signal; entity overlap second
+            # Shared entities (same user/host/IP) is strongest signal;
+            # MITRE alone is too common to be conclusive
             score = (
-                0.45 * mitre_sim +
-                0.30 * entity_sim +
-                0.15 * time_sim +
+                0.30 * mitre_sim +
+                0.35 * entity_sim +
+                0.25 * time_sim +
                 0.10 * sev_sim
             )
             matrix[i][j] = round(score, 4)
