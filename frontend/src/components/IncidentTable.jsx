@@ -87,7 +87,6 @@ const COLUMNS = [
   { label: 'Campaign',   field: '_campaign',    sortable: false },
   { label: 'MITRE',      field: null,           sortable: false },
   { label: 'Department', field: 'Department',   sortable: true  },
-  { label: 'Entities',   field: null,           sortable: false },
 ];
 
 function sortRows(rows, col, dir, campaignLookup) {
@@ -257,7 +256,7 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
             <tbody>
               {pageData.length === 0 ? (
                 <tr>
-                  <td colSpan={COLUMNS.length} style={{ ...CELL, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
+                  <td colSpan={8} style={{ ...CELL, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
                     No incidents match the current filters.
                   </td>
                 </tr>
@@ -321,29 +320,6 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
                     {/* Department */}
                     <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
                       {inc.Department || '—'}
-                    </td>
-                    {/* Entities */}
-                    <td style={{ ...CELL }}>
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {(inc.AccountUpn || inc.AccountName) && (
-                          <span title="User account" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', whiteSpace: 'nowrap' }}>
-                            USR
-                          </span>
-                        )}
-                        {(inc.DeviceName || inc.HostName) && (
-                          <span title="Host / device" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8', whiteSpace: 'nowrap' }}>
-                            HOST
-                          </span>
-                        )}
-                        {(inc.IpAddress || inc.RemoteIP || inc.SourceIp || inc.DestinationIp) && (
-                          <span title="IP address" style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', backgroundColor: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)', color: '#a855f7', whiteSpace: 'nowrap' }}>
-                            IP
-                          </span>
-                        )}
-                        {!inc.AccountUpn && !inc.AccountName && !inc.DeviceName && !inc.HostName && !inc.IpAddress && !inc.RemoteIP && (
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>—</span>
-                        )}
-                      </div>
                     </td>
                   </tr>
                 );
