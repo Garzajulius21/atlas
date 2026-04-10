@@ -80,7 +80,9 @@ function ClusterCard({ cluster, correlations }) {
             <XAxis dataKey="sev" tick={{ fontSize: 10, fill: '#5a7a9a' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 9, fill: '#5a7a9a' }} axisLine={false} tickLine={false} />
             <Tooltip
-              contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '11px' }}
+              contentStyle={{ backgroundColor: '#13100a', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '11px', color: '#e8dcc8' }}
+              labelStyle={{ color: '#e8dcc8' }}
+              itemStyle={{ color: '#e8dcc8' }}
               cursor={{ fill: 'rgba(255,255,255,0.04)' }}
             />
             <Bar dataKey="count" radius={[3, 3, 0, 0]}>
