@@ -20,9 +20,10 @@ function tacticUrl(id)   { return `https://attack.mitre.org/tactics/${id}/`; }
 function techniqueUrl(t) { return `https://attack.mitre.org/techniques/${t.replace('.', '/')}/`; }
 
 // ── Tactic card ───────────────────────────────────────────────────────────────
-function TacticCell({ tactic, onDrillDown, isDrilled }) {
+function TacticCell({ tactic, onDrillDown, isDrilled, maxCount }) {
   const covered   = tactic.count > 0;
   const intensity = covered ? Math.min(tactic.count / 10, 1) : 0;
+  const barPct    = maxCount > 0 ? (tactic.count / maxCount) * 100 : 0;
 
   return (
     <div
@@ -69,7 +70,11 @@ function TacticCell({ tactic, onDrillDown, isDrilled }) {
             {tactic.count}
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '4px' }}>incidents</span>
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+          {/* Few-compliant length encoding — comparable across all cards */}
+          <div style={{ height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', marginTop: '6px', marginBottom: '4px' }}>
+            <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: '#a855f7', borderRadius: '2px', opacity: 0.75, transition: 'width 0.4s' }} />
+          </div>
+          <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
             {tactic.techniques.length} technique{tactic.techniques.length !== 1 ? 's' : ''} observed
           </div>
           <div style={{ fontSize: '9px', color: 'rgba(168,85,247,0.6)', marginTop: '4px' }}>
@@ -272,7 +277,8 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
   if (!data) return null;
   const { tactic_coverage, top_techniques, covered_tactics, gap_tactics, total_unique_techniques } = data;
 
-  const tacticMap = Object.fromEntries((tactic_coverage || []).map(t => [t.id, t]));
+  const tacticMap  = Object.fromEntries((tactic_coverage || []).map(t => [t.id, t]));
+  const maxCount   = Math.max(...(tactic_coverage || []).map(t => t.count), 1);
 
   // Build technique → campaign map for top techniques attribution
   const techCampaignMap = {};
@@ -321,7 +327,7 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
           {TACTIC_ORDER.map(id => {
             const tactic = tacticMap[id];
             return tactic ? (
-              <TacticCell key={id} tactic={tactic} onDrillDown={handleDrillDown} isDrilled={drilledTactic?.id === id} />
+              <TacticCell key={id} tactic={tactic} onDrillDown={handleDrillDown} isDrilled={drilledTactic?.id === id} maxCount={maxCount} />
             ) : null;
           })}
         </div>
