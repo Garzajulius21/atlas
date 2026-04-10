@@ -29,30 +29,15 @@ function getClusterColor(clusterId) {
 }
 
 
-// Rendered inside the Recharts SVG — plot area background + reference rings
-function MapBackground({ width, height, offset }) {
+// Rings rendered inside recharts SVG — background is handled by the container div
+function MapRings({ width, height, offset }) {
   if (!width || !height || !offset) return null;
-  const x = offset.left;
-  const y = offset.top;
-  const w = width - offset.left - offset.right;
-  const h = height - offset.top - offset.bottom;
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const maxR = Math.min(w, h) / 2;
+  const cx = offset.left + (width - offset.left - offset.right) / 2;
+  const cy = offset.top + (height - offset.top - offset.bottom) / 2;
+  const maxR = Math.min(width - offset.left - offset.right, height - offset.top - offset.bottom) / 2;
 
   return (
     <g>
-      {/* Plot area background */}
-      <rect
-        x={x} y={y} width={w} height={h}
-        fill="#0e0b07" rx={6}
-      />
-      {/* Border around plot area */}
-      <rect
-        x={x} y={y} width={w} height={h}
-        fill="none" stroke="#2e2410" strokeWidth={1} rx={6}
-      />
-      {/* Concentric reference rings — 25%, 50%, 75% of max radius */}
       {[0.28, 0.52, 0.76].map((pct, i) => (
         <circle
           key={i}
@@ -64,9 +49,8 @@ function MapBackground({ width, height, offset }) {
           strokeDasharray="3 5"
         />
       ))}
-      {/* Crosshair at center */}
-      <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} stroke="#2e2410" strokeWidth={1} />
-      <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} stroke="#2e2410" strokeWidth={1} />
+      <line x1={cx - 6} y1={cy} x2={cx + 6} y2={cy} stroke="#3d3218" strokeWidth={1} />
+      <line x1={cx} y1={cy - 6} x2={cx} y2={cy + 6} stroke="#3d3218" strokeWidth={1} />
     </g>
   );
 }
@@ -216,6 +200,13 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
 
         {/* Chart */}
         <div style={{ padding: '8px 16px 16px' }}>
+          {/* Container provides the dark background — recharts SVG is transparent */}
+          <div style={{
+            backgroundColor: '#0a0805',
+            border: '1px solid #2e2410',
+            borderRadius: '8px',
+            overflow: 'hidden',
+          }}>
           <ResponsiveContainer width="100%" height={480}>
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <XAxis
@@ -228,7 +219,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
               />
               <ZAxis type="number" dataKey="z" range={[40, 140]} />
               <Tooltip content={<CustomTooltip />} cursor={false} />
-              <Customized component={MapBackground} />
+              <Customized component={MapRings} />
 
               {sortedGroups.map(group => {
                 const color = getClusterColor(group.clusterId);
@@ -264,7 +255,7 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
               })}
             </ScatterChart>
           </ResponsiveContainer>
-
+          </div>
         </div>
       </div>
 
