@@ -61,15 +61,25 @@ function SeverityBars({ breakdown, compact = false }) {
   );
 }
 
+function cohesionVerdict(score) {
+  if (score >= 0.80) return 'Very tightly linked';
+  if (score >= 0.60) return 'Strongly linked';
+  if (score >= 0.40) return 'Moderately linked';
+  return 'Loosely linked';
+}
+
 function CohesionPill({ value }) {
-  const pct = Math.round(value * 100);
+  const pct   = Math.round(value * 100);
   const color = value >= 0.7 ? '#ff7b7b' : value >= 0.5 ? '#ffaa33' : '#f59e0b';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <div style={{ width: '52px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
-        <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '2px' }} />
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+        <div style={{ width: '52px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
+          <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '2px' }} />
+        </div>
+        <span style={{ fontSize: '10px', fontFamily: 'monospace', color }}>{pct}%</span>
       </div>
-      <span style={{ fontSize: '10px', fontFamily: 'monospace', color }}>{pct}%</span>
+      <div style={{ fontSize: '9px', color, opacity: 0.8 }}>{cohesionVerdict(value)}</div>
     </div>
   );
 }
