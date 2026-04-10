@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const SEVERITY_COLORS = {
   High:          { bg: 'rgba(255,68,68,0.15)',  border: 'rgba(255,68,68,0.4)',  text: '#ff7b7b' },
@@ -16,8 +16,7 @@ const STATUS_COLORS = {
   Closed:        '#5a7a9a',
 };
 
-function mitreTacticUrl(technique) {
-  // T1059.001 → https://attack.mitre.org/techniques/T1059/001
+function mitreTechniqueUrl(technique) {
   const normalised = technique.trim().replace('.', '/');
   return `https://attack.mitre.org/techniques/${normalised}`;
 }
@@ -54,6 +53,14 @@ function Field({ label, value, mono = false }) {
 }
 
 export default function IncidentDrawer({ incident, clusters, correlations, allIncidents, onClose }) {
+  // Internal navigation stack — root is the clicked incident, navigate into correlated ones
+  const [history, setHistory] = useState([incident]);
+
+  // Reset when the root incident changes (user clicks a different row)
+  useEffect(() => {
+    setHistory([incident]);
+  }, [incident?.IncidentId]);
+
   // Close on Escape key
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
@@ -63,22 +70,29 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
 
   if (!incident) return null;
 
-  const sev = SEVERITY_COLORS[incident.Severity] || SEVERITY_COLORS.Informational;
-  const incId = incident.IncidentId;
+  const current = history[history.length - 1];
+  const canGoBack = history.length > 1;
 
-  // Find which campaign this incident belongs to
-  const campaign = clusters?.clusters?.find(c => c.incident_ids.includes(incId));
+  const navigateTo = (inc) => {
+    if (inc) setHistory(h => [...h, inc]);
+  };
 
-  // Find correlated incidents involving this one
+  const goBack = () => {
+    setHistory(h => h.length > 1 ? h.slice(0, -1) : h);
+  };
+
+  const sev = SEVERITY_COLORS[current.Severity] || SEVERITY_COLORS.Informational;
+  const incId = current.IncidentId;
+
+  const campaign = clusters?.clusters?.find(c => c.incident_ids?.includes(incId));
+
   const relatedPairs = (correlations?.pairs || [])
     .filter(p => p.a === incId || p.b === incId)
-    .slice(0, 5);
+    .slice(0, 8);
 
-  // Look up the other incident's title for each pair
   const incidentMap = Object.fromEntries((allIncidents || []).map(i => [i.IncidentId, i]));
 
-  // Parse MITRE techniques
-  const techniques = (incident.MitreTechniques || '')
+  const techniques = (current.MitreTechniques || '')
     .split(',').map(t => t.trim().toUpperCase()).filter(Boolean);
 
   return (
@@ -114,6 +128,23 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
           backgroundColor: 'var(--bg-surface)',
           zIndex: 1,
         }}>
+          {/* Back nav */}
+          {canGoBack && (
+            <button
+              onClick={goBack}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: '11px', color: 'var(--text-secondary)',
+                marginBottom: '10px', padding: '0',
+                display: 'flex', alignItems: 'center', gap: '4px',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              ← Back to {history[history.length - 2]?.IncidentId}
+            </button>
+          )}
+
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
@@ -123,7 +154,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
               <div style={{
                 fontSize: '14px', fontWeight: 600,
                 color: 'var(--text-primary)', lineHeight: 1.4
-              }}>{incident.Title}</div>
+              }}>{current.Title}</div>
             </div>
             <button
               onClick={onClose}
@@ -142,14 +173,14 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
               padding: '2px 10px', borderRadius: '4px', fontSize: '11px',
               fontWeight: 700, fontFamily: 'monospace',
               backgroundColor: sev.bg, border: `1px solid ${sev.border}`, color: sev.text
-            }}>{incident.Severity}</span>
+            }}>{current.Severity}</span>
             <span style={{
               fontSize: '12px', fontFamily: 'monospace',
-              color: STATUS_COLORS[incident.Status] || 'var(--text-secondary)'
-            }}>{incident.Status}</span>
-            {incident.CreatedTime && (
+              color: STATUS_COLORS[current.Status] || 'var(--text-secondary)'
+            }}>{current.Status}</span>
+            {current.CreatedTime && (
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: 'auto', fontFamily: 'monospace' }}>
-                {String(incident.CreatedTime).slice(0, 16).replace('T', ' ')}
+                {String(current.CreatedTime).slice(0, 16).replace('T', ' ')}
               </span>
             )}
           </div>
@@ -171,7 +202,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                   {campaign.label}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                  {campaign.size} incidents · {campaign.time_span_hours.toFixed(0)}h span · cohesion {Math.round(campaign.cohesion * 100)}%
+                  {campaign.size} incidents · {campaign.time_span_hours?.toFixed(0)}h span · cohesion {Math.round((campaign.cohesion || 0) * 100)}%
                 </div>
               </div>
             </Section>
@@ -190,7 +221,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                 {techniques.map(t => (
                   <a
                     key={t}
-                    href={mitreTacticUrl(t)}
+                    href={mitreTechniqueUrl(t)}
                     target="_blank"
                     rel="noreferrer"
                     style={{
@@ -221,19 +252,39 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                   const otherId = pair.a === incId ? pair.b : pair.a;
                   const other = incidentMap[otherId];
                   const pct = Math.round(pair.score * 100);
+                  const pctColor = pct >= 70 ? '#ff7b7b' : pct >= 50 ? '#ffaa33' : '#f59e0b';
                   return (
-                    <div key={i} style={{
-                      padding: '10px 12px',
-                      backgroundColor: 'var(--bg-input)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '6px',
-                    }}>
+                    <button
+                      key={i}
+                      onClick={() => navigateTo(other)}
+                      disabled={!other}
+                      style={{
+                        width: '100%', textAlign: 'left',
+                        padding: '10px 12px',
+                        backgroundColor: 'var(--bg-input)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        cursor: other ? 'pointer' : 'default',
+                        transition: 'border-color 0.15s, background 0.15s',
+                      }}
+                      onMouseEnter={e => {
+                        if (other) {
+                          e.currentTarget.style.borderColor = pctColor + '88';
+                          e.currentTarget.style.backgroundColor = pctColor + '0a';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                        e.currentTarget.style.backgroundColor = 'var(--bg-input)';
+                      }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                         <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-mono)' }}>{otherId}</span>
                         <span style={{
                           marginLeft: 'auto', fontSize: '11px', fontFamily: 'monospace', fontWeight: 700,
-                          color: pct >= 70 ? '#ff7b7b' : pct >= 50 ? '#ffaa33' : '#f59e0b'
+                          color: pctColor,
                         }}>{pct}% match</span>
+                        {other && <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>→</span>}
                       </div>
                       {other && (
                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
@@ -251,7 +302,7 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                           ))}
                         </div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -260,21 +311,21 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
 
           {/* Incident details */}
           <Section title="Details">
-            <Field label="Department" value={incident.Department} />
-            <Field label="Classification" value={incident.Classification} />
-            <Field label="Investigation State" value={incident.InvestigationState} />
-            <Field label="Assigned To" value={incident.AssignedTo} />
-            <Field label="Last Updated" value={incident.LastUpdatedTime} mono />
+            <Field label="Department" value={current.Department} />
+            <Field label="Classification" value={current.Classification} />
+            <Field label="Investigation State" value={current.InvestigationState} />
+            <Field label="Assigned To" value={current.AssignedTo} />
+            <Field label="Last Updated" value={current.LastUpdatedTime} mono />
           </Section>
 
           {/* Hashed entities */}
           <Section title="Entities (SHA-256 anonymised)">
-            <Field label="Account UPN" value={incident.AccountUpn} mono />
-            <Field label="Account Name" value={incident.AccountName} mono />
-            <Field label="Device Name" value={incident.DeviceName} mono />
-            <Field label="Hostname" value={incident.HostName} mono />
-            <Field label="IP Address" value={incident.IpAddress} mono />
-            <Field label="Remote IP" value={incident.RemoteIP} mono />
+            <Field label="Account UPN" value={current.AccountUpn} mono />
+            <Field label="Account Name" value={current.AccountName} mono />
+            <Field label="Device Name" value={current.DeviceName} mono />
+            <Field label="Hostname" value={current.HostName} mono />
+            <Field label="IP Address" value={current.IpAddress} mono />
+            <Field label="Remote IP" value={current.RemoteIP} mono />
           </Section>
 
         </div>

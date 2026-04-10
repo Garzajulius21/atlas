@@ -17,6 +17,18 @@ const STATUS_COLORS = {
   Closed:        { text: '#5a7a9a' },
 };
 
+const SEV_ORDER = { High: 0, Medium: 1, Low: 2, Informational: 3 };
+
+const CLUSTER_COLORS = [
+  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
+  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+];
+
+function getClusterColor(clusterId) {
+  if (clusterId === null || clusterId === undefined) return '#4b5563';
+  return CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length];
+}
+
 function SeverityBadge({ severity }) {
   const c = SEVERITY_COLORS[severity] || SEVERITY_COLORS.Informational;
   return (
@@ -37,34 +49,68 @@ function StatusDot({ status }) {
 
 function MitreTags({ techniques }) {
   if (!techniques) return <span style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>—</span>;
-  const tags = techniques.split(',').map(t => t.trim()).filter(Boolean).slice(0, 4);
+  const all = techniques.split(',').map(t => t.trim()).filter(Boolean);
+  const shown = all.slice(0, 3);
+  const extra = all.length - shown.length;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-      {tags.map(t => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+      {shown.map(t => (
         <span key={t} style={{
           padding: '1px 6px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
           backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
           color: '#a855f7', whiteSpace: 'nowrap'
         }}>{t}</span>
       ))}
+      {extra > 0 && (
+        <span style={{ fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+          +{extra} more
+        </span>
+      )}
     </div>
   );
 }
 
-const COL_STYLES = {
-  header: {
-    fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
-    letterSpacing: '0.08em', color: 'var(--text-secondary)',
-    padding: '10px 12px', textAlign: 'left',
-    borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', userSelect: 'none',
-  },
-  cell: {
-    padding: '10px 12px', borderBottom: '1px solid var(--border)',
-    fontSize: '12px', color: 'var(--text-primary)', verticalAlign: 'middle',
-  }
+const CELL = {
+  padding: '10px 12px', borderBottom: '1px solid var(--border)',
+  fontSize: '12px', color: 'var(--text-primary)', verticalAlign: 'middle',
 };
 
 const PAGE_SIZE = 25;
+
+// Columns: { label, field, sortable }
+const COLUMNS = [
+  { label: 'ID',         field: 'IncidentId',  sortable: true  },
+  { label: 'Title',      field: 'Title',        sortable: true  },
+  { label: 'Severity',   field: 'Severity',     sortable: true  },
+  { label: 'Status',     field: 'Status',       sortable: true  },
+  { label: 'Created',    field: 'CreatedTime',  sortable: true  },
+  { label: 'Campaign',   field: '_campaign',    sortable: false },
+  { label: 'MITRE',      field: null,           sortable: false },
+  { label: 'Department', field: 'Department',   sortable: true  },
+  { label: 'Entities',   field: null,           sortable: false },
+];
+
+function sortRows(rows, col, dir, campaignLookup) {
+  return [...rows].sort((a, b) => {
+    let va, vb;
+    if (col === 'Severity') {
+      va = SEV_ORDER[a.Severity] ?? 99;
+      vb = SEV_ORDER[b.Severity] ?? 99;
+    } else if (col === 'CreatedTime') {
+      va = a.CreatedTime || '';
+      vb = b.CreatedTime || '';
+    } else if (col === '_campaign') {
+      va = campaignLookup[a.IncidentId] || 'zzz';
+      vb = campaignLookup[b.IncidentId] || 'zzz';
+    } else {
+      va = String(a[col] || '').toLowerCase();
+      vb = String(b[col] || '').toLowerCase();
+    }
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
 
 export default function IncidentTable({ incidents, clusters, correlations }) {
   const [search, setSearch] = useState('');
@@ -72,23 +118,51 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [page, setPage] = useState(0);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const [sortCol, setSortCol] = useState('CreatedTime');
+  const [sortDir, setSortDir] = useState('desc');
+
+  // Build campaign lookup: incidentId → { label, id }
+  const campaignLookup = useMemo(() => {
+    const map = {};
+    for (const c of (clusters?.clusters || [])) {
+      for (const id of (c.incident_ids || [])) {
+        map[id] = { label: c.label, id: c.id };
+      }
+    }
+    return map;
+  }, [clusters]);
+
+  const handleSort = (col) => {
+    if (!col) return;
+    if (sortCol === col) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortCol(col);
+      setSortDir(col === 'CreatedTime' ? 'desc' : 'asc');
+    }
+    setPage(0);
+  };
 
   const filtered = useMemo(() => {
-    return incidents.filter(inc => {
+    const base = incidents.filter(inc => {
       if (severityFilter !== 'All' && inc.Severity !== severityFilter) return false;
-      if (statusFilter !== 'All' && inc.Status !== statusFilter) return false;
+      if (statusFilter !== 'All' && inc.Status !== statusFilter && inc.Status !== statusFilter.replace('InProgress', 'In Progress')) return false;
       if (search) {
         const q = search.toLowerCase();
         return (
           String(inc.IncidentId || '').toLowerCase().includes(q) ||
           String(inc.Title || '').toLowerCase().includes(q) ||
           String(inc.MitreTechniques || '').toLowerCase().includes(q) ||
-          String(inc.Department || '').toLowerCase().includes(q)
+          String(inc.Department || '').toLowerCase().includes(q) ||
+          (campaignLookup[inc.IncidentId]?.label || '').toLowerCase().includes(q)
         );
       }
       return true;
     });
-  }, [incidents, search, severityFilter, statusFilter]);
+    return sortRows(base, sortCol, sortDir, Object.fromEntries(
+      Object.entries(campaignLookup).map(([k, v]) => [k, v.label])
+    ));
+  }, [incidents, search, severityFilter, statusFilter, sortCol, sortDir, campaignLookup]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const pageData = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -106,6 +180,11 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
     transition: 'all 0.15s'
   });
 
+  const sortIndicator = (field) => {
+    if (!field || sortCol !== field) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>;
+    return <span style={{ marginLeft: '4px', color: 'var(--accent-blue)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  };
+
   return (
     <>
       <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
@@ -121,7 +200,7 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
 
           <input
             type="text"
-            placeholder="Search ID, title, MITRE, dept…"
+            placeholder="Search ID, title, MITRE, dept, campaign…"
             value={search}
             onChange={e => handleSearch(e.target.value)}
             style={{
@@ -139,7 +218,7 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           </div>
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            {['All', 'Active', 'InProgress', 'Resolved', 'Closed'].map(s => (
+            {['All', 'Active', 'In Progress', 'Resolved', 'Closed'].map(s => (
               <button key={s} style={filterBtnStyle(statusFilter === s)} onClick={() => handleStatus(s)}>{s}</button>
             ))}
           </div>
@@ -154,20 +233,39 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-primary)' }}>
-                {['ID', 'Title', 'Severity', 'Status', 'Created', 'MITRE Techniques', 'Department', 'Entities'].map(h => (
-                  <th key={h} style={COL_STYLES.header}>{h}</th>
+                {COLUMNS.map(col => (
+                  <th
+                    key={col.label}
+                    onClick={() => col.sortable && handleSort(col.field)}
+                    style={{
+                      fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
+                      letterSpacing: '0.08em', color: 'var(--text-secondary)',
+                      padding: '10px 12px', textAlign: 'left',
+                      borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap',
+                      userSelect: 'none',
+                      cursor: col.sortable ? 'pointer' : 'default',
+                    }}
+                    onMouseEnter={e => { if (col.sortable) e.currentTarget.style.color = 'var(--text-primary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  >
+                    {col.label}
+                    {col.sortable && sortIndicator(col.field)}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {pageData.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ ...COL_STYLES.cell, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
+                  <td colSpan={COLUMNS.length} style={{ ...CELL, textAlign: 'center', color: 'var(--text-secondary)', padding: '32px' }}>
                     No incidents match the current filters.
                   </td>
                 </tr>
               ) : pageData.map((inc, i) => {
                 const isSelected = selectedIncident?.IncidentId === inc.IncidentId;
+                const campaign = campaignLookup[inc.IncidentId];
+                const campColor = campaign ? getClusterColor(campaign.id) : null;
+
                 return (
                   <tr
                     key={inc.IncidentId || i}
@@ -183,29 +281,52 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
                     onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
                     onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'; }}
                   >
-                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-mono)', whiteSpace: 'nowrap' }}>
+                    {/* ID */}
+                    <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-mono)', whiteSpace: 'nowrap' }}>
                       {inc.IncidentId || '—'}
                     </td>
-                    <td style={{ ...COL_STYLES.cell, maxWidth: '280px' }}>
+                    {/* Title */}
+                    <td style={{ ...CELL, maxWidth: '260px' }}>
                       <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {inc.Title || '—'}
                       </div>
                     </td>
-                    <td style={COL_STYLES.cell}><SeverityBadge severity={inc.Severity} /></td>
-                    <td style={COL_STYLES.cell}><StatusDot status={inc.Status} /></td>
-                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                    {/* Severity */}
+                    <td style={CELL}><SeverityBadge severity={inc.Severity} /></td>
+                    {/* Status */}
+                    <td style={CELL}><StatusDot status={inc.Status} /></td>
+                    {/* Created */}
+                    <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
                       {inc.CreatedTime ? inc.CreatedTime.slice(0, 16).replace('T', ' ') : '—'}
                     </td>
-                    <td style={{ ...COL_STYLES.cell, maxWidth: '220px' }}>
+                    {/* Campaign */}
+                    <td style={CELL}>
+                      {campaign ? (
+                        <span style={{
+                          fontSize: '10px', fontFamily: 'monospace', fontWeight: 600,
+                          color: campColor, backgroundColor: campColor + '18',
+                          padding: '2px 7px', borderRadius: '3px', whiteSpace: 'nowrap',
+                          border: `1px solid ${campColor}40`,
+                        }}>
+                          {campaign.label}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>—</span>
+                      )}
+                    </td>
+                    {/* MITRE */}
+                    <td style={{ ...CELL, maxWidth: '200px' }}>
                       <MitreTags techniques={inc.MitreTechniques} />
                     </td>
-                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    {/* Department */}
+                    <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
                       {inc.Department || '—'}
                     </td>
-                    <td style={{ ...COL_STYLES.cell, fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)' }}>
-                      {inc.AccountUpn && <div>USR: {inc.AccountUpn}</div>}
-                      {inc.DeviceName && <div>HOST: {inc.DeviceName}</div>}
-                      {inc.IpAddress && <div>IP: {inc.IpAddress}</div>}
+                    {/* Entities */}
+                    <td style={{ ...CELL, fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)' }}>
+                      {inc.AccountUpn && <div>USR: {String(inc.AccountUpn).slice(0, 8)}…</div>}
+                      {inc.DeviceName && <div>HOST: {String(inc.DeviceName).slice(0, 8)}…</div>}
+                      {inc.IpAddress && <div>IP: {String(inc.IpAddress).slice(0, 8)}…</div>}
                     </td>
                   </tr>
                 );
