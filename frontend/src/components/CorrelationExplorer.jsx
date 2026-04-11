@@ -320,7 +320,7 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
             !p.a.toLowerCase().includes(q) && !p.b.toLowerCase().includes(q)) return false;
       }
       return true;
-    });
+    }).sort((a, b) => b.score - a.score);
   }, [pairs, minScore, search, strengthFilter, incidentLookup]);
 
   if (!pairs.length) {
@@ -336,10 +336,12 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
     );
   }
 
-  // Stats
-  const veryStrong = pairs.filter(p => p.score >= 0.75).length;
-  const strong = pairs.filter(p => p.score >= 0.55 && p.score < 0.75).length;
-  const moderate = pairs.filter(p => p.score >= 0.40 && p.score < 0.55).length;
+  // Stats — counts from pairs visible above current minScore slider
+  const threshold = minScore / 100;
+  const aboveThreshold = pairs.filter(p => p.score >= threshold);
+  const veryStrong = aboveThreshold.filter(p => p.score >= 0.75).length;
+  const strong     = aboveThreshold.filter(p => p.score >= 0.55 && p.score < 0.75).length;
+  const moderate   = aboveThreshold.filter(p => p.score >= 0.40 && p.score < 0.55).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -389,6 +391,22 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
           })}
         </div>
 
+        {/* Clear filters button */}
+        {(strengthFilter || search || minScore > 35) && (
+          <button
+            onClick={() => { setStrengthFilter(null); setSearch(''); setMinScore(35); }}
+            style={{
+              fontSize: '11px', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer',
+              border: '1px solid var(--border)', backgroundColor: 'transparent',
+              color: 'var(--text-secondary)', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b80'; e.currentTarget.style.color = '#f59e0b'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          >
+            Clear filters
+          </button>
+        )}
+
         {/* Controls */}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -421,9 +439,26 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
           <div style={{
             backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: '8px', padding: '32px', textAlign: 'center',
-            fontSize: '13px', color: 'var(--text-secondary)',
           }}>
-            No pairs match the current filters.
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+              {strengthFilter && minScore > { verystrong: 74, strong: 54, moderate: 54 }[strengthFilter]
+                ? `No ${strengthFilter === 'verystrong' ? 'Very Strong' : strengthFilter === 'strong' ? 'Strong' : 'Moderate'} pairs — the Min Score slider (${minScore}%) is above this band's range.`
+                : search
+                ? `No pairs match "${search}".`
+                : 'No pairs match the current filters.'}
+            </div>
+            {(strengthFilter || search || minScore > 35) && (
+              <button
+                onClick={() => { setStrengthFilter(null); setSearch(''); setMinScore(35); }}
+                style={{
+                  fontSize: '11px', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer',
+                  border: '1px solid var(--border)', backgroundColor: 'transparent',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           filtered.map((pair, i) => (
