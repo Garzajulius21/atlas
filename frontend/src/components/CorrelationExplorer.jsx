@@ -367,14 +367,22 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
         {/* Strength breakdown — clickable filters */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
-            { label: 'Very Strong', key: 'verystrong', count: veryStrong, color: '#ff7b7b' },
-            { label: 'Strong',      key: 'strong',     count: strong,     color: '#f59e0b' },
-            { label: 'Moderate',    key: 'moderate',   count: moderate,   color: '#38bdf8' },
-          ].map(({ label, key, count, color }) => {
+            { label: 'Very Strong', key: 'verystrong', count: veryStrong, color: '#ff7b7b', minScore: 75 },
+            { label: 'Strong',      key: 'strong',     count: strong,     color: '#f59e0b', minScore: 55 },
+            { label: 'Moderate',    key: 'moderate',   count: moderate,   color: '#38bdf8', minScore: 40 },
+          ].map(({ label, key, count, color, minScore: bandMin }) => {
             const active = strengthFilter === key;
             return (
               <button key={key}
-                onClick={() => setStrengthFilter(active ? null : key)}
+                onClick={() => {
+                  if (active) {
+                    setStrengthFilter(null);
+                    setMinScore(35);
+                  } else {
+                    setStrengthFilter(key);
+                    setMinScore(bandMin);
+                  }
+                }}
                 style={{
                   textAlign: 'center', cursor: 'pointer', padding: '6px 12px',
                   borderRadius: '6px', border: `1px solid ${active ? color + '80' : 'var(--border)'}`,
