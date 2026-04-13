@@ -1,53 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── Design tokens ───────────────────────────────────────────────────────────── */
 :root {
-  --bg-primary: #0c0a06;
-  --bg-surface: #13100a;
-  --bg-input:   #1a1508;
-  --border:     #2e2410;
-  --border-hi:  #3d3218;
-  --accent-blue:   #f59e0b;
-  --accent-green:  #00ff88;
-  --accent-amber:  #f59e0b;
-  --accent-red:    #ff4444;
-  --accent-purple: #a855f7;
-  --text-primary:   #e8dcc8;
-  --text-secondary: #7a6a4a;
-  --text-mono:      #b8a070;
+
+  /* Backgrounds — three clear depth levels */
+  --bg-primary:  #080b14;   /* page base */
+  --bg-surface:  #0d1117;   /* panels, cards */
+  --bg-elevated: #131920;   /* card interiors, expanded rows */
+  --bg-input:    #1a2233;   /* inputs, controls */
+
+  /* Borders */
+  --border:    #1e2a3a;     /* default border */
+  --border-hi: #2d3d52;     /* hover / active border */
+
+  /* Text */
+  --text-primary:   #e2e8f0;  /* headings, values, important labels */
+  --text-secondary: #64748b;  /* supporting labels, metadata */
+  --text-muted:     #475569;  /* placeholder, very secondary */
+  --text-mono:      #94a3b8;  /* monospace IDs, codes, scores */
+
+  /* Primary accent — refined indigo */
+  --accent:         #818cf8;
+  --accent-dim:     rgba(129, 140, 248, 0.10);
+  --accent-border:  rgba(129, 140, 248, 0.30);
+
+  /* Legacy accent aliases — kept so components don't break */
+  --accent-purple: #818cf8;   /* was #a855f7 — now indigo */
+  --accent-blue:   #38bdf8;   /* was mislabeled amber — now actually blue */
+  --accent-green:  #34d399;   /* emerald — unchanged */
+  --accent-amber:  #f59e0b;   /* amber — unchanged */
+  --accent-red:    #f87171;   /* refined red — was #ff4444 */
+
+  /* Severity — refined, consistent saturation */
+  --sev-high:   #f87171;   /* red */
+  --sev-medium: #fb923c;   /* orange */
+  --sev-low:    #fbbf24;   /* amber */
+  --sev-info:   #64748b;   /* slate */
+
+  /* Spacing scale — 4px base grid */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Typography scale */
+  --text-xs:   10px;
+  --text-sm:   11px;
+  --text-base: 13px;
+  --text-md:   14px;
+  --text-lg:   16px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  32px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* Transitions */
+  --transition-fast: 0.12s ease;
+  --transition-base: 0.18s ease;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Reset ───────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+/* ── Base ────────────────────────────────────────────────────────────────────── */
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: var(--text-md);
   line-height: 1.6;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root { min-height: 100vh; display: flex; flex-direction: column; }
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+/* ── Scrollbar ───────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border-hi); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+/* ── Animations ──────────────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: -400px 0; }
   100% { background-position:  400px 0; }
 }
 
 @keyframes atlas-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .tab-content {
-  animation: atlas-fade-in 0.18s ease-out both;
+  animation: atlas-fade-in var(--transition-base) both;
 }
 
+/* ── Skeleton loader ─────────────────────────────────────────────────────────── */
 .skeleton-block {
-  border-radius: 4px;
-  background: linear-gradient(90deg, #1a1508 25%, #2a1f0d 50%, #1a1508 75%);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--bg-input)    50%,
+    var(--bg-elevated) 75%
+  );
   background-size: 400px 100%;
   animation: shimmer 1.4s infinite linear;
 }
