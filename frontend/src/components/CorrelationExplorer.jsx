@@ -336,12 +336,10 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
     );
   }
 
-  // Stats — counts from pairs visible above current minScore slider
-  const threshold = minScore / 100;
-  const aboveThreshold = pairs.filter(p => p.score >= threshold);
-  const veryStrong = aboveThreshold.filter(p => p.score >= 0.75).length;
-  const strong     = aboveThreshold.filter(p => p.score >= 0.55 && p.score < 0.75).length;
-  const moderate   = aboveThreshold.filter(p => p.score >= 0.40 && p.score < 0.55).length;
+  // Stats — global counts across all pairs (stable dataset totals, not filtered)
+  const veryStrong = pairs.filter(p => p.score >= 0.75).length;
+  const strong     = pairs.filter(p => p.score >= 0.55 && p.score < 0.75).length;
+  const moderate   = pairs.filter(p => p.score >= 0.40 && p.score < 0.55).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
