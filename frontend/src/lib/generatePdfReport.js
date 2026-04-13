@@ -54,6 +54,31 @@ const TECHNIQUE_PLAIN = {
 
 function techPlain(t) { return TECHNIQUE_PLAIN[t] || t; }
 
+function cohesionVerdict(score) {
+  if (score >= 0.85) return 'Confirmed campaign';
+  if (score >= 0.68) return 'Highly likely';
+  if (score >= 0.50) return 'Probable';
+  if (score >= 0.30) return 'Possible';
+  return 'Weak signal';
+}
+
+function analysisDateRange(incidents) {
+  if (!incidents?.length) return null;
+  const dates = incidents.map(i => i.CreatedTime).filter(Boolean).map(d => new Date(d)).filter(d => !isNaN(d));
+  if (!dates.length) return null;
+  const min = new Date(Math.min(...dates));
+  const max = new Date(Math.max(...dates));
+  const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return min.toDateString() === max.toDateString() ? fmt(min) : `${fmt(min)} – ${fmt(max)}`;
+}
+
+// First sentence only — for executive-level action summaries
+function firstSentence(text) {
+  if (!text) return '';
+  const match = text.match(/^[^.!?]+[.!?]/);
+  return match ? match[0] : text.slice(0, 120) + (text.length > 120 ? '…' : '');
+}
+
 function humanTime(hours) {
   if (!hours || hours === 0) return '< 1 hour';
   if (hours < 1)   return '< 1 hour';
@@ -224,6 +249,7 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
   const critRecs = (recommendations?.recommendations || []).filter(r => r.priority === 'Critical');
   const highRecs = (recommendations?.recommendations || []).filter(r => r.priority === 'High');
   const actions = [...critRecs, ...highRecs].slice(0, 6);
+  const dateRange = analysisDateRange(incidents);
 
   const narrative = buildNarrative(incidents, clusters, mitre, heatmap, recommendations);
 
@@ -232,7 +258,7 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
       <td><strong>${c.label}</strong></td>
       <td style="text-align:center;">${c.size}</td>
       <td style="text-align:center;">${humanTime(c.time_span_hours)}</td>
-      <td style="text-align:center;">${Math.round(c.cohesion * 100)}%</td>
+      <td style="font-size:10px;color:#555;">${cohesionVerdict(c.cohesion)} <span style="color:#aaa;">(${Math.round(c.cohesion * 100)}%)</span></td>
       <td>${sevStrip(c.severity_breakdown, c.size)}</td>
       <td style="color:#555;font-size:10px;">${c.top_techniques.slice(0,2).map(techPlain).join(', ') || '—'}</td>
     </tr>`).join('');
@@ -251,7 +277,7 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
       <div>${badge(r.priority, PRIORITY_COLOR[r.priority])}</div>
       <div>
         <div style="font-weight:600;font-size:11px;margin-bottom:2px;">${r.title}</div>
-        <div style="font-size:10px;color:#555;line-height:1.5;">${r.detail}</div>
+        <div style="font-size:10px;color:#555;line-height:1.5;">${firstSentence(r.detail)}</div>
       </div>
       <div style="font-size:10px;color:#777;">${CONTROL_OWNER[r.control] || r.control}</div>
       <div style="font-size:10px;color:${PRIORITY_COLOR[r.priority]};font-weight:600;">${PRIORITY_TIMEFRAME[r.priority]}</div>
@@ -285,7 +311,7 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
     <div class="metric-grid">
       <div class="metric" style="border-left-color:#2c3e50;">
         <div class="metric-val">${totalInc}</div>
-        <div class="metric-label">Incidents Analysed</div>
+        <div class="metric-label">Incidents Analysed${dateRange ? `<br/><span style="font-size:8px;color:#aaa;text-transform:none;letter-spacing:0;">${dateRange}</span>` : ''}</div>
       </div>
       <div class="metric" style="border-left-color:${totalCamp > 0 ? '#c0392b' : '#27ae60'};">
         <div class="metric-val" style="color:${totalCamp > 0 ? '#c0392b' : '#27ae60'};">${totalCamp}</div>
@@ -353,12 +379,16 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
 
 // ── Page 2: Technical Report ──────────────────────────────────────────────────
 
-function page2(incidents, clusters, mitre, heatmap, recommendations, correlations) {
+function page2(incidents, clusters, mitre, heatmap, recommendations, correlations, date) {
   const campaigns = clusters?.clusters || [];
   const covered = (mitre?.tactic_coverage || []).filter(t => t.count > 0);
   const gaps = mitre?.gap_tactics || [];
   const recs = recommendations?.recommendations || [];
-  const pairs = (correlations?.pairs || []).slice(0, 8);
+  const pairs = (correlations?.pairs || []).sort((a, b) => b.score - a.score).slice(0, 8);
+
+  // Incident title lookup for pairs table
+  const incMap = {};
+  for (const inc of (incidents || [])) incMap[inc.IncidentId] = inc;
 
   const campDetail = campaigns.map(c => {
     const sevParts = ['High','Medium','Low','Informational']
@@ -370,8 +400,8 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
         <td><strong>${c.label}</strong></td>
         <td style="text-align:center;">${c.size}</td>
         <td style="text-align:center;">${humanTime(c.time_span_hours)}</td>
-        <td style="text-align:center;">${Math.round(c.cohesion * 100)}%</td>
-        <td style="font-family:monospace;font-size:10px;">${c.top_techniques.slice(0,5).join(', ')}</td>
+        <td style="font-size:10px;">${cohesionVerdict(c.cohesion)} <span style="color:#aaa;">(${Math.round(c.cohesion * 100)}%)</span></td>
+        <td style="font-family:monospace;font-size:10px;">${c.top_techniques.slice(0,5).join(', ') || '—'}</td>
         <td>${sevParts}</td>
       </tr>`;
   }).join('');
@@ -408,22 +438,37 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
       <td style="font-size:10px;color:#777;vertical-align:top;padding-top:8px;">${r.evidence || '—'}</td>
     </tr>`).join('');
 
-  const pairRows = pairs.map(p => `
+  const pairRows = pairs.map(p => {
+    const titleA = incMap[p.a]?.Title || p.a;
+    const titleB = incMap[p.b]?.Title || p.b;
+    const sc = p.score >= 0.75 ? '#c0392b' : p.score >= 0.55 ? '#d68910' : '#1a5276';
+    return `
     <tr>
-      <td style="font-family:monospace;font-size:10px;">${p.a}</td>
-      <td style="font-family:monospace;font-size:10px;">${p.b}</td>
-      <td style="text-align:center;font-weight:700;">${Math.round(p.score * 100)}%</td>
+      <td>
+        <div style="font-weight:600;font-size:11px;">${titleA}</div>
+        <div style="font-family:monospace;font-size:9px;color:#aaa;margin-top:1px;">${p.a}</div>
+      </td>
+      <td>
+        <div style="font-weight:600;font-size:11px;">${titleB}</div>
+        <div style="font-family:monospace;font-size:9px;color:#aaa;margin-top:1px;">${p.b}</div>
+      </td>
+      <td style="text-align:center;font-weight:700;color:${sc};">${Math.round(p.score * 100)}%</td>
       <td style="font-size:10px;font-family:monospace;color:#555;">${(p.shared_mitre || []).join(', ') || '—'}</td>
       <td style="font-size:10px;color:#555;">${(p.shared_entities || []).slice(0,3).join(', ') || '—'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   return `
   <div class="page">
 
-    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #111;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #111;">
       <div>
         <div style="font-size:18px;font-weight:700;color:#111;">ATLAS — Technical Report</div>
         <div style="font-size:11px;color:#555;margin-top:2px;">For security operations and engineering teams</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#333;font-weight:500;">${date}</div>
+        <div style="font-size:10px;color:#999;margin-top:2px;letter-spacing:0.05em;">CONFIDENTIAL</div>
       </div>
     </div>
 
@@ -477,7 +522,7 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
       <div class="appendix-title">About This Report — How to Interpret the Findings</div>
       <div class="appendix-grid">
         <div class="appendix-item"><strong>What is ATLAS?</strong> A local threat correlation and clustering framework. It analyses Defender incident exports to find hidden patterns, group related incidents into campaigns, and generate prioritised recommendations.</div>
-        <div class="appendix-item"><strong>What is cohesion?</strong> A score (0–100%) measuring how tightly linked the incidents in a campaign are. Above 70% = very likely the same threat actor. Below 40% = loosely related — monitor but do not assume coordination.</div>
+        <div class="appendix-item"><strong>What is campaign confidence?</strong> A label (Confirmed / Highly likely / Probable / Possible / Weak signal) indicating how tightly linked the incidents in a campaign are. "Confirmed" (≥85%) means the algorithm is highly certain of a single threat actor. "Weak signal" (&lt;30%) means loosely related — monitor but do not assume coordination.</div>
         <div class="appendix-item"><strong>What is a detection gap?</strong> A MITRE ATT&amp;CK tactic with no incidents mapped to it. This could mean no attacks occurred there, or (more likely) that detection coverage is absent and attacks went unrecorded.</div>
         <div class="appendix-item"><strong>Privacy note:</strong> All usernames, hostnames, and IP addresses are SHA-256 hashed before any processing. No raw PII appears in this report. Entity codes (e.g. USR-A3F2) are anonymised identifiers — consistent across incidents but non-reversible.</div>
       </div>
@@ -505,7 +550,7 @@ export function openPdfReport({ incidents, clusters, correlations, mitre, heatma
 </head>
 <body>
   ${page1(date, incidents, clusters, mitre, heatmap, recommendations)}
-  ${page2(incidents, clusters, mitre, heatmap, recommendations, correlations)}
+  ${page2(incidents, clusters, mitre, heatmap, recommendations, correlations, date)}
   <script>
     window.addEventListener('load', () => setTimeout(() => window.print(), 700));
   </script>
