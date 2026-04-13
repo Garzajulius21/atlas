@@ -100,7 +100,12 @@ def analyse_mitre(records: List[Dict]) -> Dict:
         {
           'technique_counts': {T1059: 12, ...},
           'tactic_coverage': [
-            {'id': 'TA0001', 'name': 'Initial Access', 'count': 5, 'techniques': [...]},
+            {
+              'id': 'TA0001', 'name': 'Initial Access', 'count': 5,
+              'techniques': [...],
+              'total_known_techniques': 4,     # techniques in our map for this tactic
+              'severity_breakdown': {'High': 2, 'Medium': 2, 'Low': 1, 'Informational': 0},
+            },
             ...
           ],
           'top_techniques': [{technique, count, tactic_id, tactic_name}, ...],
@@ -111,6 +116,31 @@ def analyse_mitre(records: List[Dict]) -> Dict:
     """
     all_techs = _extract_techniques(records)
     tech_counts = Counter(all_techs)
+
+    # Pre-compute severity breakdown per tactic:
+    # For each record, find which tactics its techniques belong to and bucket the severity.
+    SEVER_KEYS = ['High', 'Medium', 'Low', 'Informational']
+    tactic_severity: Dict[str, Dict[str, int]] = {
+        tac: {k: 0 for k in SEVER_KEYS} for tac in TACTICS
+    }
+    for rec in records:
+        raw = rec.get('MitreTechniques', '') or ''
+        sev = rec.get('Severity', 'Informational')
+        if sev not in SEVER_KEYS:
+            sev = 'Informational'
+        seen_tacs = set()
+        for t in raw.split(','):
+            t = t.strip().upper().split('.')[0]
+            tac = TECHNIQUE_TACTIC_MAP.get(t)
+            if tac and tac not in seen_tacs:
+                tactic_severity[tac][sev] += 1
+                seen_tacs.add(tac)  # count each tactic once per incident
+
+    # Count known techniques per tactic from our mapping table
+    known_per_tactic: Dict[str, int] = {tac: 0 for tac in TACTICS}
+    for tac in TECHNIQUE_TACTIC_MAP.values():
+        if tac in known_per_tactic:
+            known_per_tactic[tac] += 1
 
     # Build tactic coverage
     tactic_coverage = []
@@ -125,6 +155,8 @@ def analyse_mitre(records: List[Dict]) -> Dict:
             'name': TACTIC_NAMES[tac_id],
             'count': count,
             'techniques': tac_techs,
+            'total_known_techniques': known_per_tactic[tac_id],
+            'severity_breakdown': tactic_severity[tac_id],
         })
 
     gap_tactics = [t for t in TACTICS if t not in covered]

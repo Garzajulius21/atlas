@@ -71,11 +71,32 @@ function TacticCell({ tactic, onDrillDown, isDrilled, maxCount }) {
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '4px' }}>incidents</span>
           </div>
           {/* Few-compliant length encoding — comparable across all cards */}
-          <div style={{ height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', marginTop: '6px', marginBottom: '4px' }}>
+          <div style={{ height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', marginTop: '6px', marginBottom: '6px' }}>
             <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: '#a855f7', borderRadius: '2px', opacity: 0.75, transition: 'width 0.4s' }} />
           </div>
+          {/* Severity breakdown */}
+          {tactic.severity_breakdown && (
+            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '5px' }}>
+              {[['High','#ff7b7b'],['Medium','#ffaa33'],['Low','#f59e0b'],['Informational','#5a7a9a']].map(([sev, color]) => {
+                const n = tactic.severity_breakdown[sev] || 0;
+                if (!n) return null;
+                return (
+                  <span key={sev} style={{
+                    fontSize: '9px', fontFamily: 'monospace', fontWeight: 700,
+                    color, backgroundColor: color + '18',
+                    border: `1px solid ${color}44`,
+                    padding: '0px 4px', borderRadius: '3px',
+                  }}>{sev[0]}{n}</span>
+                );
+              })}
+            </div>
+          )}
+          {/* Technique coverage fraction */}
           <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-            {tactic.techniques.length} technique{tactic.techniques.length !== 1 ? 's' : ''} observed
+            {tactic.techniques.length}
+            {tactic.total_known_techniques > 0 && (
+              <span style={{ color: 'rgba(168,85,247,0.5)' }}>/{tactic.total_known_techniques}</span>
+            )} technique{tactic.techniques.length !== 1 ? 's' : ''} observed
           </div>
           <div style={{ fontSize: '9px', color: 'rgba(168,85,247,0.6)', marginTop: '4px' }}>
             {isDrilled ? 'Click to close ▲' : 'Click to explore ▾'}
