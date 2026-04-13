@@ -201,7 +201,7 @@ export default function App() {
                 {activeTab === 'Campaigns' && <CampaignsTab points={clusterMapPoints} clusters={clusters} correlations={correlations} allIncidents={incidents} />}
                 {activeTab === 'MITRE' && <MitrePanel data={mitre} allIncidents={incidents} clusters={clusters} correlations={correlations} />}
                 {activeTab === 'Correlations' && <CorrelationExplorer correlations={correlations} allIncidents={incidents} clusters={clusters} />}
-                {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} allIncidents={incidents} />}
+                {activeTab === 'Risk Heatmap' && <HeatmapPanel data={heatmap} allIncidents={incidents} clusters={clusters} />}
                 {activeTab === 'Recommendations' && <RecommendPanel data={recommendations} />}
               </div>
             )}

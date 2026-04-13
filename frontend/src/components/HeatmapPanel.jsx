@@ -1,6 +1,25 @@
 import { useState, useMemo } from 'react';
 
 const SEVERITY_ORDER = ['High', 'Medium', 'Low', 'Informational'];
+
+const CLUSTER_COLORS = [
+  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
+  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+];
+function getClusterColor(id) {
+  return id != null ? CLUSTER_COLORS[id % CLUSTER_COLORS.length] : '#4b5563';
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr);
+  const hours = diff / 3600000;
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${Math.round(hours)}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.round(days / 30)}mo ago`;
+}
 const SEVERITY_COLORS = {
   High:          '#ff7b7b',
   Medium:        '#ffaa33',
@@ -70,16 +89,26 @@ function SortHeader({ label, col, sortCol, sortDir, onSort, style }) {
   );
 }
 
-function DeptRow({ dept, rank, maxScore, allIncidents, isLast }) {
+function DeptRow({ dept, rank, maxScore, allIncidents, clusters, isLast }) {
   const [expanded, setExpanded] = useState(false);
   const pct = maxScore > 0 ? (dept.risk_score / maxScore) * 100 : 0;
   const { label: riskLabel, color: riskColor } = riskLevel(pct);
+
+  const clusterList = clusters?.clusters || [];
 
   const deptIncidents = useMemo(() => {
     if (!allIncidents) return [];
     const ids = new Set(dept.incident_ids);
     return allIncidents.filter(inc => ids.has(inc.IncidentId));
   }, [allIncidents, dept.incident_ids]);
+
+  // Most recent incident date across this department
+  const latestDate = useMemo(() => {
+    if (!deptIncidents.length) return null;
+    const dates = deptIncidents.map(i => i.CreatedTime).filter(Boolean).map(d => new Date(d));
+    if (!dates.length) return null;
+    return new Date(Math.max(...dates));
+  }, [deptIncidents]);
 
   return (
     <>
@@ -108,12 +137,20 @@ function DeptRow({ dept, rank, maxScore, allIncidents, isLast }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>{rank}</span>
 
-        {/* Dept name + risk level label */}
+        {/* Dept name + risk level + last seen */}
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {dept.name}
           </div>
-          <div style={{ fontSize: '10px', color: riskColor, fontWeight: 600, marginTop: '1px' }}>{riskLabel} risk</div>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
+            <span style={{ fontSize: '10px', color: riskColor, fontWeight: 600 }}>{riskLabel} risk</span>
+            {latestDate && (
+              <>
+                <span style={{ fontSize: '10px', color: 'var(--border)' }}>·</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>last {timeAgo(latestDate)}</span>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Total incidents */}
@@ -165,9 +202,11 @@ function DeptRow({ dept, rank, maxScore, allIncidents, isLast }) {
                 })
                 .map(inc => {
                   const sc = SEVERITY_COLORS[inc.Severity] || '#6b7280';
+                  const camp = clusterList.find(c => c.incident_ids?.includes(inc.IncidentId));
+                  const campColor = camp ? getClusterColor(camp.id) : null;
                   return (
                     <div key={inc.IncidentId} style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
+                      display: 'flex', alignItems: 'center', gap: '8px',
                       padding: '6px 10px', borderRadius: '6px',
                       border: '1px solid var(--border)',
                       backgroundColor: 'var(--bg-surface)',
@@ -178,6 +217,14 @@ function DeptRow({ dept, rank, maxScore, allIncidents, isLast }) {
                         padding: '1px 6px', borderRadius: '3px', flexShrink: 0,
                       }}>{inc.Severity}</span>
                       <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-secondary)', flexShrink: 0 }}>{inc.IncidentId}</span>
+                      {camp && (
+                        <span style={{
+                          fontSize: '10px', fontFamily: 'monospace', fontWeight: 600,
+                          color: campColor, backgroundColor: campColor + '18',
+                          border: `1px solid ${campColor}44`,
+                          padding: '1px 6px', borderRadius: '3px', flexShrink: 0,
+                        }}>Campaign {camp.id + 1}</span>
+                      )}
                       <span style={{ fontSize: '12px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {inc.Title || '—'}
                       </span>
@@ -192,7 +239,7 @@ function DeptRow({ dept, rank, maxScore, allIncidents, isLast }) {
   );
 }
 
-export default function HeatmapPanel({ data, allIncidents }) {
+export default function HeatmapPanel({ data, allIncidents, clusters }) {
   const [sortCol, setSortCol] = useState('risk');
   const [sortDir, setSortDir] = useState('desc');
 
@@ -293,6 +340,7 @@ export default function HeatmapPanel({ data, allIncidents }) {
               rank={i + 1}
               maxScore={max_risk_score}
               allIncidents={allIncidents}
+              clusters={clusters}
               isLast={i === sorted.length - 1}
             />
           ))
