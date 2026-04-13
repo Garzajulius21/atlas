@@ -9,43 +9,42 @@
 
 ## Overview
 
-ATLAS is a local, environment-agnostic threat correlation and clustering framework for SOC analysts. Upload a CSV export of Microsoft Defender incidents and ATLAS automatically:
+ATLAS is a local, privacy-first threat correlation and clustering framework for SOC analysts and incident responders. Upload a CSV export of Microsoft Defender incidents and ATLAS automatically:
 
 - **Sanitizes PII** — usernames, hostnames, and IPs are SHA-256 hashed before any processing
-- **Correlates incidents** into attack campaigns using fuzzy matching (temporal proximity + TTP similarity + entity overlap)
-- **Clusters campaigns** using DBSCAN unsupervised machine learning to surface attack patterns Microsoft may have missed
-- **Maps MITRE ATT&CK gaps** — shows which tactics and techniques are undetected in your environment
-- **Builds a departmental risk heatmap** — identifies your most targeted departments
-- **Generates hardening recommendations** — specific, prioritized actions derived from cluster findings
+- **Correlates incidents** using weighted scoring: entity overlap (35%), MITRE technique similarity (30%), temporal proximity (25%), severity alignment (10%)
+- **Clusters campaigns** using DBSCAN unsupervised machine learning to surface coordinated attack patterns
+- **Maps MITRE ATT&CK coverage** — shows which tactics and techniques are detected vs blind spots, with severity breakdown and technique coverage fractions
+- **Builds a departmental risk heatmap** — identifies highest-risk departments with drill-down to individual incidents
+- **Generates hardening recommendations** — prioritised, actionable controls derived from cluster findings, tactic gaps, and department risk
+- **Exports a professional PDF report** — two-page executive briefing + technical detail, ready to hand to a CISO
 
 Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves your machine.
 
 ---
 
-## What It Does
+## Tabs
 
-1. **CSV upload** — drag and drop a Defender incident export, ATLAS validates the schema and rejects malformed data
-2. **PII sanitization** — usernames, hostnames, and IPs hashed with SHA-256 before any analysis. Comments and payload fields dropped entirely
-3. **Fuzzy correlation** — finds incidents Microsoft missed by scoring temporal proximity, TTP similarity, shared entities, and severity alignment
-4. **DBSCAN clustering** — automatically discovers the number of attack campaigns without requiring upfront configuration
-5. **Campaign map** — interactive scatter plot of incident clusters, click any cluster to drill into the incidents that form it
-6. **Department heatmap** — risk matrix of departments vs severity, scored by incident volume and TTP diversity
-7. **MITRE ATT&CK gap analysis** — ATT&CK navigator-style view showing detected techniques vs blind spots
-8. **Incident browser** — searchable, filterable table of all sanitized incidents
-9. **Recommendations engine** — maps cluster findings to specific hardening actions (e.g. "Enforce MFA for Marketing — 7 High incidents detected")
+| Tab | What it does |
+|---|---|
+| **Incidents** | Sortable, filterable table of all incidents with severity, campaign, and MITRE tags |
+| **Campaigns** | Expandable campaign table with 5-tier confidence scale and full campaign explainer |
+| **MITRE ATT&CK** | Tactic grid with incident counts, severity breakdown, technique coverage fractions, and gap analysis |
+| **Correlations** | Ranked correlation pairs with shared signals, strength filters, and campaign context |
+| **Risk Heatmap** | Departmental risk ranked by severity-weighted score, with incident drill-down and campaign badges |
+| **Recommendations** | Prioritised hardening actions with source attribution, collapsible detail, and priority/source filters |
 
 ---
 
 ## Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.11+ / Flask |
+|---|---|
+| Backend | Python 3.12 / Flask |
 | Data processing | pandas, scikit-learn, numpy |
 | Input validation | jsonschema |
-| Frontend | React 18 + Vite + Tailwind CSS |
-| Visualisation | Recharts, D3.js |
-| Security | PII hashing, input validation, CORS locked to localhost |
+| Frontend | React 18 + Vite (inline styles — no CSS framework) |
+| Security | SHA-256 PII hashing, input validation, CORS locked to localhost |
 
 ---
 
@@ -57,7 +56,7 @@ Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves y
 
 ### Install
 ```bash
-# Backend — create a Python 3.12 venv (required for scikit-learn)
+# Backend
 cd backend
 /opt/homebrew/bin/python3.12 -m venv venv
 source venv/bin/activate
@@ -92,9 +91,20 @@ Open **http://localhost:5173**
 
 ---
 
+## PDF Export
+
+ATLAS generates a two-page print-ready report:
+
+- **Page 1 — Executive Briefing**: Overall risk level, key metrics, auto-generated narrative summary, campaign table, departmental risk, and prioritised actions with ownership and timeframes
+- **Page 2 — Technical Report**: Full campaign detail, MITRE ATT&CK coverage matrix, complete recommendations with evidence, and top correlated incident pairs with titles
+
+Both pages include the analysis date range, confidence verdict labels, and a privacy footer confirming all PII is hashed.
+
+---
+
 ## Future — Live Graph API Integration
 
-When organizational approval is granted, the CSV ingestion layer can be swapped for a live Microsoft Graph API pull. The entire analysis, clustering, and UI layer remains unchanged. Required permissions (read-only):
+When organisational approval is granted, the CSV ingestion layer can be swapped for a live Microsoft Graph API pull. The entire analysis, clustering, and UI layer remains unchanged. Required permissions (read-only):
 
 - `SecurityIncident.Read.All`
 - `SecurityAlert.Read.All`
@@ -107,16 +117,19 @@ See `SPEC.md` for full technical specification, KQL queries, algorithm details, 
 
 ## Project Status
 
-| Phase | Status |
-|-------|--------|
+| Component | Status |
+|---|---|
 | Spec & architecture | ✅ Complete |
 | Backend — ingest & sanitize | ✅ Complete |
 | Backend — correlation & clustering | ✅ Complete |
-| Backend — MITRE gap analysis | ✅ Complete |
+| Backend — MITRE gap analysis (severity breakdown + coverage fractions) | ✅ Complete |
 | Backend — departmental heatmap | ✅ Complete |
 | Backend — recommendations engine | ✅ Complete |
 | Frontend — upload & incident browser | ✅ Complete |
-| Frontend — campaign cluster view | ✅ Complete |
-| Frontend — department risk heatmap | ✅ Complete |
-| Frontend — MITRE ATT&CK gap panel | ✅ Complete |
-| Frontend — recommendations panel | ✅ Complete |
+| Frontend — campaigns (expandable table, confidence scale) | ✅ Complete |
+| Frontend — correlation explorer (ranked pairs, strength filters) | ✅ Complete |
+| Frontend — department risk heatmap (drill-down, campaign badges) | ✅ Complete |
+| Frontend — MITRE ATT&CK panel (severity pips, coverage fractions, gap summary) | ✅ Complete |
+| Frontend — recommendations panel (collapsible, priority + source filters) | ✅ Complete |
+| PDF export (executive + technical, two-page) | ✅ Complete |
+| Stephen Few compliance audit | ✅ Complete |
