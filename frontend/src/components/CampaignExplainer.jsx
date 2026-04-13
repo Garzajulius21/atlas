@@ -58,14 +58,11 @@ function Tag({ children, color = '#f59e0b' }) {
   );
 }
 
-function Row({ icon, label, children }) {
+function Row({ label, children }) {
   return (
-    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontSize: '16px', width: '24px', textAlign: 'center', flexShrink: 0 }}>{icon}</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{label}</div>
-        {children}
-      </div>
+    <div style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{label}</div>
+      {children}
     </div>
   );
 }
@@ -96,7 +93,6 @@ export default function CampaignExplainer({ cluster, correlations }) {
         <div style={{
           width: '10px', height: '10px', borderRadius: '50%',
           backgroundColor: color, flexShrink: 0,
-          boxShadow: `0 0 8px ${color}88`,
         }} />
         <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
           {cluster.label}
@@ -127,12 +123,12 @@ export default function CampaignExplainer({ cluster, correlations }) {
       </div>
 
       {/* Detail rows */}
-      <Row icon="🔗" label="Why clustered">
+      <Row label="Why clustered">
         <div style={{ fontSize: '12px', color, fontWeight: 600, marginBottom: '2px' }}>{cohesion.label} ({Math.round(cluster.cohesion * 100)}% cohesion)</div>
         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{cohesion.detail}</div>
       </Row>
 
-      <Row icon="🎯" label="Shared MITRE techniques">
+      <Row label="Shared MITRE techniques">
         {cluster.top_techniques.length > 0 ? (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {cluster.top_techniques.map(t => (
@@ -153,7 +149,7 @@ export default function CampaignExplainer({ cluster, correlations }) {
       </Row>
 
       {sharedEntities.length > 0 && (
-        <Row icon="👤" label="Shared entities (hashed)">
+        <Row label="Shared entities (hashed)">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {sharedEntities.map(({ entity, count }) => (
               <span key={entity} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -168,7 +164,7 @@ export default function CampaignExplainer({ cluster, correlations }) {
         </Row>
       )}
 
-      <Row icon="⏱️" label="Time window">
+      <Row label="Time window">
         <div style={{ fontSize: '12px', color: 'var(--text-primary)' }}>
           All incidents occurred within <strong>{timeSpan}</strong> of each other
         </div>
@@ -181,7 +177,7 @@ export default function CampaignExplainer({ cluster, correlations }) {
         </div>
       </Row>
 
-      <Row icon="⚠️" label="Severity breakdown">
+      <Row label="Severity breakdown">
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           {sevEntries.map(sev => (
             <Tag key={sev} color={sevColors[sev]}>
@@ -191,7 +187,7 @@ export default function CampaignExplainer({ cluster, correlations }) {
         </div>
       </Row>
 
-      <Row icon="🆔" label="Incident IDs in this campaign">
+      <Row label="Incident IDs in this campaign">
         <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-mono)', lineHeight: 2 }}>
           {cluster.incident_ids.join('  ·  ')}
         </div>

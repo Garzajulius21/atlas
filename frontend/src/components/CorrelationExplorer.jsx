@@ -278,7 +278,7 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
             )}
             {delta && (
               <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                ⏱ {delta}
+                {delta}
               </div>
             )}
           </div>

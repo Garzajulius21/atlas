@@ -7,19 +7,12 @@ const PRIORITY_STYLES = {
   Low:      { bg: 'rgba(90,122,154,0.1)',   border: 'rgba(90,122,154,0.25)', text: '#5a7a9a', dot: '#5a7a9a' },
 };
 
-const SOURCE_ICONS = {
-  'Technique Frequency': '🔍',
-  'Cluster Analysis':    '🔗',
-  'MITRE Gap':           '⚠️',
-  'Departmental Risk':   '🏢',
-};
 
 const ALL_SOURCES = ['Technique Frequency', 'Cluster Analysis', 'MITRE Gap', 'Departmental Risk'];
 
 function RecommendCard({ rec, index }) {
   const [expanded, setExpanded] = useState(false);
   const p = PRIORITY_STYLES[rec.priority] || PRIORITY_STYLES.Low;
-  const icon = SOURCE_ICONS[rec.source] || '·';
 
   return (
     <div style={{
@@ -58,7 +51,6 @@ function RecommendCard({ rec, index }) {
           {/* Evidence line — visible even collapsed */}
           {rec.evidence && (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span>{icon}</span>
               <span style={{ fontFamily: 'monospace', color: 'var(--text-mono)' }}>{rec.source}</span>
               <span style={{ color: 'var(--border)' }}>·</span>
               <span>{rec.evidence}</span>
@@ -200,7 +192,7 @@ export default function RecommendPanel({ data }) {
                   transition: 'all 0.15s',
                 }}
               >
-                {SOURCE_ICONS[src]} {src}
+                {src}
               </button>
             );
           })}
