@@ -350,7 +350,10 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
         borderRadius: '10px', padding: '16px 20px',
         display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap',
       }}>
-        <div>
+        <div style={{
+          paddingLeft: '12px',
+          borderLeft: '3px solid var(--accent)',
+        }}>
           <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2px' }}>
             Correlation Explorer
           </div>

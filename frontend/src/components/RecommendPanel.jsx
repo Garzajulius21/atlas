@@ -130,7 +130,7 @@ export default function RecommendPanel({ data }) {
         display: 'flex', alignItems: 'flex-start', gap: '20px', flexWrap: 'wrap',
       }}>
         {/* Title + summary sentence */}
-        <div style={{ flex: 1, minWidth: '200px' }}>
+        <div style={{ flex: 1, minWidth: '200px', paddingLeft: '12px', borderLeft: '3px solid var(--accent)' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '4px' }}>
             Hardening Recommendations
           </div>

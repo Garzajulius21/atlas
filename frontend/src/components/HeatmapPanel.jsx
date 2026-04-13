@@ -279,23 +279,27 @@ export default function HeatmapPanel({ data, allIncidents, clusters }) {
             value: topDept?.name ?? '—',
             sub: topDept ? `Risk score ${topDept.risk_score}` : '',
             color: '#ff7b7b',
+            accent: '#ff7b7b',
           },
           {
             label: 'Departments',
             value: total_departments,
             sub: highRiskDepts > 0 ? `${highRiskDepts} high or critical` : 'All low risk',
             color: highRiskDepts > 0 ? '#ffaa33' : '#38bdf8',
+            accent: highRiskDepts > 0 ? '#ffaa33' : '#38bdf8',
           },
           {
             label: 'Total Incidents',
             value: totalIncidents,
             sub: unassigned_count > 0 ? `${unassigned_count} unassigned` : 'All assigned',
             color: 'var(--text-primary)',
+            accent: 'var(--accent)',
           },
-        ].map(({ label, value, sub, color }) => (
+        ].map(({ label, value, sub, color, accent }) => (
           <div key={label} style={{
             backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: '8px', padding: '14px 16px',
+            borderLeft: `3px solid ${accent}`,
           }}>
             <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', marginBottom: '6px' }}>
               {label}

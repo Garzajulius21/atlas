@@ -23,10 +23,10 @@ export default function UploadPanel({ onUpload, loading, stats, error }) {
 
   const cardStyle = {
     backgroundColor: 'var(--bg-surface)',
-    border: `1px solid ${dragging ? 'var(--accent-blue)' : 'var(--border)'}`,
+    border: `1px solid ${dragging ? 'var(--accent)' : 'var(--border)'}`,
     borderRadius: '10px',
     padding: '24px',
-    transition: 'border-color 0.2s'
+    transition: 'border-color 0.2s',
   };
 
   return (
@@ -42,13 +42,13 @@ export default function UploadPanel({ onUpload, loading, stats, error }) {
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
         style={{
-          border: `2px dashed ${dragging ? 'var(--accent-blue)' : 'var(--border-hi)'}`,
+          border: `2px dashed ${dragging ? 'var(--accent)' : 'var(--border-hi)'}`,
           borderRadius: '8px',
           padding: '32px 20px',
           textAlign: 'center',
           cursor: 'pointer',
-          backgroundColor: dragging ? 'rgba(245,158,11,0.04)' : 'transparent',
-          transition: 'all 0.2s'
+          backgroundColor: dragging ? 'var(--accent-dim)' : 'transparent',
+          transition: 'all 0.2s',
         }}
       >
         <input
@@ -117,8 +117,8 @@ export default function UploadPanel({ onUpload, loading, stats, error }) {
       {/* Privacy notice */}
       <div style={{
         marginTop: '14px', padding: '8px 12px',
-        backgroundColor: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.12)',
-        borderRadius: '6px', fontSize: '11px', color: 'var(--text-secondary)'
+        backgroundColor: 'var(--accent-dim)', border: '1px solid var(--accent-border)',
+        borderRadius: '6px', fontSize: '11px', color: 'var(--text-secondary)',
       }}>
         🔒 PII is hashed locally before any processing. Usernames, hostnames, and IPs are SHA-256 anonymized. Comments and payload fields are dropped.
       </div>
