@@ -14,10 +14,10 @@ ATLAS is a local, privacy-first threat correlation and clustering framework for 
 - **Sanitizes PII** — usernames, hostnames, and IPs are SHA-256 hashed before any processing
 - **Correlates incidents** using weighted scoring: entity overlap (35%), MITRE technique similarity (30%), temporal proximity (25%), severity alignment (10%)
 - **Clusters campaigns** using DBSCAN unsupervised machine learning to surface coordinated attack patterns
-- **Maps MITRE ATT&CK coverage** — shows which tactics and techniques are detected vs blind spots, with severity breakdown and technique coverage fractions
+- **Maps MITRE ATT&CK coverage** — shows which tactics are detected vs blind spots, with severity breakdown and technique coverage fractions
 - **Builds a departmental risk heatmap** — identifies highest-risk departments with drill-down to individual incidents
 - **Generates hardening recommendations** — prioritised, actionable controls derived from cluster findings, tactic gaps, and department risk
-- **Exports a professional PDF report** — two-page executive briefing + technical detail, ready to hand to a CISO
+- **Exports a professional PDF report** — two-page executive briefing + technical detail, ready to present to leadership
 
 Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves your machine.
 
@@ -27,11 +27,11 @@ Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves y
 
 | Tab | What it does |
 |---|---|
-| **Incidents** | Sortable, filterable table of all incidents with severity, campaign, and MITRE tags |
-| **Campaigns** | Expandable campaign table with 5-tier confidence scale and full campaign explainer |
+| **Incidents** | Sortable, filterable table of all incidents — search by ID, title, technique, department, or campaign. Keyboard-navigable with arrow keys. |
+| **Campaigns** | Expandable campaign table with 5-tier confidence scale (Confirmed / Highly likely / Probable / Possible / Weak signal), severity breakdown, and full campaign explainer |
 | **MITRE ATT&CK** | Tactic grid with incident counts, severity breakdown, technique coverage fractions, and gap analysis |
-| **Correlations** | Ranked correlation pairs with shared signals, strength filters, and campaign context |
-| **Risk Heatmap** | Departmental risk ranked by severity-weighted score, with incident drill-down and campaign badges |
+| **Correlations** | Ranked correlation pairs with shared signals, adjustable threshold slider, strength filters, and campaign context |
+| **Risk Heatmap** | Departmental risk ranked by severity-weighted score (High×4 · Medium×2 · Low×1), with incident drill-down and campaign badges |
 | **Recommendations** | Prioritised hardening actions with source attribution, collapsible detail, and priority/source filters |
 
 ---
@@ -41,17 +41,17 @@ Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves y
 | Layer | Technology |
 |---|---|
 | Backend | Python 3.12 / Flask |
-| Data processing | pandas, scikit-learn, numpy |
+| Data processing | pandas, scikit-learn (DBSCAN), numpy |
 | Input validation | jsonschema |
 | Frontend | React 18 + Vite (inline styles — no CSS framework) |
-| Security | SHA-256 PII hashing, input validation, CORS locked to localhost |
+| Security | SHA-256 PII hashing, JSON Schema input validation, CORS locked to localhost |
 
 ---
 
 ## Setup
 
 ### Prerequisites
-- Python 3.12 (via `brew install python@3.12`)
+- Python 3.12 (`brew install python@3.12`)
 - Node.js v18+
 
 ### Install
@@ -83,7 +83,7 @@ Open **http://localhost:5173**
 ## Privacy & Security
 
 - All PII hashed with SHA-256 before any processing — raw values never stored or transmitted
-- Comments and Payload fields dropped at ingestion — never processed
+- `Comments` and `Payload` fields dropped at ingestion — never processed
 - Optional salt configurable in `backend/.env` for non-reversible hashing
 - Strict JSON Schema validation at ingestion — malformed rows skipped and logged
 - No LLM in the core pipeline — no prompt injection surface
@@ -95,10 +95,28 @@ Open **http://localhost:5173**
 
 ATLAS generates a two-page print-ready report:
 
-- **Page 1 — Executive Briefing**: Overall risk level, key metrics, auto-generated narrative summary, campaign table, departmental risk, and prioritised actions with ownership and timeframes
-- **Page 2 — Technical Report**: Full campaign detail, MITRE ATT&CK coverage matrix, complete recommendations with evidence, and top correlated incident pairs with titles
+**Page 1 — Executive Briefing**
+Overall risk level (Critical / High / Medium), key metrics, auto-generated narrative summary, campaign table with confidence verdicts, departmental risk exposure, and prioritised actions with ownership and timeframes.
+
+**Page 2 — Technical Report**
+Full campaign detail with MITRE techniques, complete ATT&CK coverage matrix, full hardening recommendations with evidence citations, and top correlated incident pairs with shared signals.
 
 Both pages include the analysis date range, confidence verdict labels, and a privacy footer confirming all PII is hashed.
+
+---
+
+## Correlation Algorithm
+
+ATLAS builds a pairwise similarity matrix across all incidents using four weighted signals:
+
+| Signal | Weight | Method |
+|---|---|---|
+| Shared entities (user/host/IP) | 35% | Jaccard similarity on hashed entity sets |
+| MITRE technique overlap | 30% | Jaccard similarity on technique sets |
+| Temporal proximity | 25% | Exponential decay within 72h window |
+| Severity alignment | 10% | Normalised difference in severity weights |
+
+Incidents scoring above the correlation threshold are passed to DBSCAN, which discovers campaign clusters without requiring a predefined number of clusters. Outliers are labeled as isolated incidents.
 
 ---
 
@@ -106,30 +124,17 @@ Both pages include the analysis date range, confidence verdict labels, and a pri
 
 When organisational approval is granted, the CSV ingestion layer can be swapped for a live Microsoft Graph API pull. The entire analysis, clustering, and UI layer remains unchanged. Required permissions (read-only):
 
-- `SecurityIncident.Read.All`
-- `SecurityAlert.Read.All`
-- `IdentityInfo.Read.All`
-- `User.Read.All`
+| Permission | Justification |
+|---|---|
+| `SecurityIncident.Read.All` | Read Defender incidents |
+| `SecurityAlert.Read.All` | Read alert evidence and entity data |
+| `IdentityInfo.Read.All` | Resolve department for risk heatmap |
+| `User.Read.All` | UPN to department mapping |
 
-See `SPEC.md` for full technical specification, KQL queries, algorithm details, and adversarial threat model.
+No write permissions. No Global Admin. See `SPEC.md` for full KQL queries and threat model.
 
 ---
 
-## Project Status
+## Sample Data
 
-| Component | Status |
-|---|---|
-| Spec & architecture | ✅ Complete |
-| Backend — ingest & sanitize | ✅ Complete |
-| Backend — correlation & clustering | ✅ Complete |
-| Backend — MITRE gap analysis (severity breakdown + coverage fractions) | ✅ Complete |
-| Backend — departmental heatmap | ✅ Complete |
-| Backend — recommendations engine | ✅ Complete |
-| Frontend — upload & incident browser | ✅ Complete |
-| Frontend — campaigns (expandable table, confidence scale) | ✅ Complete |
-| Frontend — correlation explorer (ranked pairs, strength filters) | ✅ Complete |
-| Frontend — department risk heatmap (drill-down, campaign badges) | ✅ Complete |
-| Frontend — MITRE ATT&CK panel (severity pips, coverage fractions, gap summary) | ✅ Complete |
-| Frontend — recommendations panel (collapsible, priority + source filters) | ✅ Complete |
-| PDF export (executive + technical, two-page) | ✅ Complete |
-| Stephen Few compliance audit | ✅ Complete |
+A `sample-incidents.csv` file is included in the repository root for testing and demonstration purposes. All data is synthetic — no real incidents, no real PII.

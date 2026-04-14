@@ -31,12 +31,15 @@ atlas/
 │   └── src/
 │       ├── App.jsx
 │       └── components/
-│           ├── UploadPanel.jsx       ← CSV drag-and-drop
-│           ├── ClusterMap.jsx        ← Campaign cluster visualization
-│           ├── HeatmapPanel.jsx      ← Department risk heatmap
-│           ├── MitreGapPanel.jsx     ← ATT&CK coverage gaps
-│           ├── IncidentTable.jsx     ← Searchable incident browser
-│           └── RecommendPanel.jsx    ← Hardening recommendations
+│           ├── UploadPanel.jsx          ← CSV drag-and-drop with landing page
+│           ├── IncidentTable.jsx        ← Searchable, sortable incident browser
+│           ├── CampaignsTab.jsx         ← Expandable campaign table with confidence tiers
+│           ├── CorrelationExplorer.jsx  ← Ranked correlation pairs with filters
+│           ├── HeatmapPanel.jsx         ← Department risk heatmap with drill-down
+│           ├── MitrePanel.jsx           ← ATT&CK tactic grid and gap analysis
+│           ├── RecommendPanel.jsx       ← Prioritised hardening recommendations
+│           ├── IncidentDrawer.jsx       ← Slide-in incident detail panel
+│           └── Tooltip.jsx              ← Portal-based tooltip component
 ├── SPEC.md
 ├── README.md
 └── start-atlas.command
@@ -119,12 +122,12 @@ Standard Defender correlation groups incidents by its own logic — but misses c
 
 | Signal | Weight | Logic |
 |--------|--------|-------|
-| Temporal proximity | 0.30 | Incidents within a configurable window (default 72h) score higher |
-| TTP similarity | 0.40 | Jaccard similarity between MITRE technique sets |
-| Entity overlap | 0.20 | Shared hashed IPs, hosts, or users across incidents |
-| Severity alignment | 0.10 | Same severity tier (High+High scores higher than High+Low) |
+| Entity overlap | 0.35 | Shared hashed IPs, hosts, or users across incidents (Jaccard similarity) |
+| TTP similarity | 0.30 | Jaccard similarity between MITRE technique sets |
+| Temporal proximity | 0.25 | Exponential decay within a configurable window (default 72h) |
+| Severity alignment | 0.10 | Normalised difference in severity weights |
 
-**Composite score:** Incidents with a combined score ≥ 0.65 (configurable) are flagged as likely correlated and grouped into a candidate campaign.
+**Composite score:** Incidents with a combined score ≥ 0.70 (configurable) are passed to DBSCAN for campaign clustering.
 
 ```python
 def jaccard_similarity(set_a: set, set_b: set) -> float:
@@ -172,10 +175,10 @@ Join incident data with the `Department` field to produce a risk score per depar
 **Risk score formula:**
 
 ```
-DeptRiskScore = (High × 3) + (Medium × 2) + (Low × 1) + (Unique TTPs × 0.5)
+DeptRiskScore = (High × 4) + (Medium × 2) + (Low × 1)
 ```
 
-Output: a matrix of Department × Severity × Count, normalized 0–100, rendered as a heatmap in the dashboard.
+Output: departments ranked by severity-weighted risk score, with per-department incident drill-down, campaign badges, and last-activity timestamps.
 
 ---
 
@@ -306,9 +309,9 @@ IncidentData
 | Campaign discovery | Poor — forces grouping | Ideal — finds dense attack bursts |
 
 DBSCAN parameters:
-- `eps` — maximum distance between two incidents to be considered neighbors (tuned via silhouette score)
-- `min_samples` — minimum incidents to form a campaign cluster (default: 3)
-- Feature vector per incident: `[normalized_time, severity_score, ttp_vector (TF-IDF), entity_hash_overlap]`
+- `eps` — derived from correlation threshold: `eps = 1 - CORRELATION_THRESHOLD` (default: 0.30)
+- `min_samples` — minimum incidents to form a campaign cluster (default: 2, configurable via `MIN_CLUSTER_SIZE` env var)
+- `metric='precomputed'` — uses the precomputed similarity matrix converted to a distance matrix
 
 ### Recommendations Engine (`recommend.py`)
 
@@ -329,12 +332,13 @@ Maps cluster findings to specific hardening actions:
 
 | Panel | Description |
 |-------|-------------|
-| **Upload** | CSV drag-and-drop, validation feedback, record count |
-| **Campaign Clusters** | Interactive scatter plot of incident clusters, click to expand |
-| **Department Heatmap** | Grid of departments × severity, color-coded by risk score |
-| **MITRE Coverage** | ATT&CK navigator-style grid showing detected vs missing techniques |
-| **Incident Browser** | Searchable, filterable table of all sanitized incidents |
-| **Recommendations** | Prioritized hardening actions derived from cluster findings |
+| **Upload** | CSV drag-and-drop with validation feedback; compact status bar after upload |
+| **Incidents** | Sortable, filterable table with search, severity/status filters, keyboard navigation, and slide-in detail drawer |
+| **Campaigns** | Expandable campaign table with 5-tier confidence scale, severity breakdown, MITRE links, and campaign explainer |
+| **MITRE ATT&CK** | Tactic grid showing detected vs missing tactics; per-tactic severity breakdown and technique coverage fractions |
+| **Correlations** | Ranked incident pairs with adjustable threshold slider, strength filter, shared signal display |
+| **Risk Heatmap** | Departments ranked by severity-weighted risk score with incident drill-down and campaign badges |
+| **Recommendations** | Prioritised hardening actions with evidence attribution, control area, and collapsible detail |
 
 ---
 
@@ -342,12 +346,11 @@ Maps cluster findings to specific hardening actions:
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Python 3.11+ / Flask |
-| Data processing | pandas, scikit-learn, numpy |
+| Backend | Python 3.12 / Flask |
+| Data processing | pandas, scikit-learn (DBSCAN), numpy |
 | Validation | jsonschema |
-| Frontend | React 18 + Vite + Tailwind CSS |
-| Visualization | Recharts (heatmap, bar), D3.js (cluster scatter) |
-| Security | Input validation, PII hashing, CORS locked to localhost |
+| Frontend | React 18 + Vite (inline styles — no CSS framework) |
+| Security | SHA-256 PII hashing, JSON Schema input validation, CORS locked to localhost |
 
 ---
 
