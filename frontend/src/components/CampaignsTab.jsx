@@ -416,8 +416,15 @@ export default function CampaignsTab({ clusters, correlations, allIncidents }) {
         </div>
 
         {sorted.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-            No campaign clusters detected. Try uploading more incidents or lowering the correlation threshold.
+          <div style={{ textAlign: 'center', padding: '48px 40px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+              No campaigns detected
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: '380px', margin: '0 auto' }}>
+              ATLAS groups incidents into campaigns using entity overlap, MITRE technique similarity, timing,
+              and severity patterns. With this dataset, all incidents appear isolated — no coordinated
+              attack activity was identified.
+            </div>
           </div>
         ) : (
           sorted.map(c => (

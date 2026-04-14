@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import IncidentDrawer from './IncidentDrawer.jsx';
 
 const SEVERITY_COLORS = {
@@ -169,6 +169,25 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
   const handleSearch = (v) => { setSearch(v); setPage(0); };
   const handleSev = (v) => { setSeverityFilter(v); setPage(0); };
   const handleStatus = (v) => { setStatusFilter(v); setPage(0); };
+
+  // Arrow key navigation through the incident list
+  useEffect(() => {
+    if (!selectedIncident) return;
+    const handler = (e) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      e.preventDefault();
+      const idx = filtered.findIndex(i => i.IncidentId === selectedIncident.IncidentId);
+      if (idx === -1) return;
+      const next = e.key === 'ArrowDown' ? idx + 1 : idx - 1;
+      if (next < 0 || next >= filtered.length) return;
+      const nextInc = filtered[next];
+      const nextPage = Math.floor(next / PAGE_SIZE);
+      if (nextPage !== page) setPage(nextPage);
+      setSelectedIncident(nextInc);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedIncident, filtered, page]);
 
   const filterBtnStyle = (active) => ({
     padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,

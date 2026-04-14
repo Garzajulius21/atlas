@@ -330,10 +330,15 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
     return (
       <div style={{
         backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: '10px', padding: '48px', textAlign: 'center',
+        borderRadius: '10px', padding: '48px 40px', textAlign: 'center',
       }}>
-        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          No correlated pairs found above threshold.
+        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+          No correlated pairs detected
+        </div>
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: '380px', margin: '0 auto' }}>
+          ATLAS looks for incidents sharing entities, MITRE techniques, timing, or severity patterns.
+          This dataset produced no pairs above the minimum threshold — the incidents appear unrelated,
+          or there are too few to find meaningful overlap.
         </div>
       </div>
     );
