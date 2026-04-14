@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
- * Tooltip — positions itself above the hovered child using the event
- * target's live getBoundingClientRect so it works in any container.
+ * Tooltip — renders via a portal into document.body so position:fixed is
+ * always relative to the viewport, regardless of transformed/filtered ancestors.
  */
 export default function Tooltip({ text, children, maxWidth = 220 }) {
   const [pos, setPos] = useState(null);
@@ -20,7 +21,7 @@ export default function Tooltip({ text, children, maxWidth = 220 }) {
     >
       {children}
 
-      {pos && (
+      {pos && createPortal(
         <div style={{
           position: 'fixed',
           top: pos.y - 8,
@@ -55,7 +56,8 @@ export default function Tooltip({ text, children, maxWidth = 220 }) {
             transform: 'rotate(45deg)',
             margin: '-5px auto 0',
           }} />
-        </div>
+        </div>,
+        document.body
       )}
     </span>
   );

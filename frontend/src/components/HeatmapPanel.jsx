@@ -44,7 +44,7 @@ function RiskBar({ score, maxScore }) {
         <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '3px', transition: 'width 0.4s' }} />
       </div>
       <Tooltip text="Severity-weighted risk score: High ×4 · Medium ×2 · Low ×1. Relative to the highest-risk department.">
-        <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right', cursor: 'default' }}>{score}</span>
+        <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right', cursor: 'default', padding: '2px 0' }}>{score}</span>
       </Tooltip>
     </div>
   );
