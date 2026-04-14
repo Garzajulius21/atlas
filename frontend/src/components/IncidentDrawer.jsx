@@ -149,14 +149,8 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
 
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: '11px', fontFamily: 'monospace',
-                color: 'var(--text-secondary)', marginBottom: '4px'
-              }}>{incId}</div>
-              <div style={{
-                fontSize: '14px', fontWeight: 600,
-                color: 'var(--text-primary)', lineHeight: 1.4
-              }}>{current.Title}</div>
+              <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-secondary)', marginBottom: '4px' }}>{incId}</div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{current.Title}</div>
             </div>
             <button
               onClick={onClose}
@@ -186,6 +180,23 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
               </span>
             )}
           </div>
+
+          {/* Keyboard hint — only shown at root level (not when navigated into a correlated incident) */}
+          {!canGoBack && (
+            <div style={{ marginTop: '8px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <kbd style={{
+                fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
+                border: '1px solid var(--border)', color: 'var(--text-secondary)',
+                backgroundColor: 'var(--bg-elevated)', fontFamily: 'monospace',
+              }}>↑</kbd>
+              <kbd style={{
+                fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
+                border: '1px solid var(--border)', color: 'var(--text-secondary)',
+                backgroundColor: 'var(--bg-elevated)', fontFamily: 'monospace',
+              }}>↓</kbd>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>navigate · Esc to close</span>
+            </div>
+          )}
         </div>
 
         {/* Body */}
