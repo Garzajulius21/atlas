@@ -31,9 +31,9 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
   const btnStyle = {
     padding: '5px 14px', borderRadius: '5px', fontSize: '11px',
     fontWeight: 600, fontFamily: 'monospace', cursor: 'pointer',
-    border: '1px solid rgba(245,158,11,0.4)',
-    backgroundColor: open ? 'rgba(245,158,11,0.15)' : 'rgba(245,158,11,0.08)',
-    color: '#f59e0b', transition: 'all 0.15s',
+    border: '1px solid var(--accent-border)',
+    backgroundColor: open ? 'var(--accent-dim)' : 'transparent',
+    color: 'var(--accent)', transition: 'all 0.15s',
     display: 'flex', alignItems: 'center', gap: '6px',
   };
 
@@ -48,7 +48,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
         <div style={{
           position: 'absolute', top: '100%', right: 0, marginTop: '6px',
           backgroundColor: 'var(--bg-surface)',
-          border: '1px solid rgba(245,158,11,0.3)',
+          border: '1px solid var(--accent-border)',
           borderRadius: '8px', overflow: 'hidden', zIndex: 200,
           minWidth: '280px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         }}>
@@ -61,7 +61,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
               background: 'none', border: 'none', cursor: 'pointer',
               borderBottom: '1px solid var(--border)', transition: 'background 0.1s',
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(245,158,11,0.06)'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px' }}>
@@ -81,7 +81,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
               background: 'none', border: 'none', cursor: 'pointer',
               transition: 'background 0.1s',
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(245,158,11,0.06)'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px' }}>
@@ -96,7 +96,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
           <div style={{
             padding: '8px 16px', borderTop: '1px solid var(--border)',
             fontSize: '10px', color: 'var(--text-secondary)',
-            backgroundColor: 'rgba(245,158,11,0.03)',
+            backgroundColor: 'var(--bg-elevated)',
           }}>
             🔒 All PII remains SHA-256 hashed in exports
           </div>

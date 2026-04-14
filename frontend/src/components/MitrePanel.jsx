@@ -7,8 +7,8 @@ const TACTIC_ORDER = [
 ];
 
 const CLUSTER_COLORS = [
-  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
-  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+  '#f59e0b','var(--accent)','#00ff88','#ff7b7b','#38bdf8',
+  '#fb7185','#34d399','#fbbf24','var(--accent)','#f97316',
 ];
 
 function getClusterColor(id) {
@@ -31,33 +31,33 @@ function TacticCell({ tactic, onDrillDown, isDrilled, maxCount }) {
       style={{
         padding: '10px', borderRadius: '6px', position: 'relative',
         border: isDrilled
-          ? '2px solid rgba(168,85,247,0.8)'
+          ? '2px solid var(--accent-border)'
           : covered
-            ? `1px solid rgba(168,85,247,${0.25 + intensity * 0.5})`
+            ? `1px solid rgba(129,140,248,${0.25 + intensity * 0.5})`
             : '1px solid rgba(255,68,68,0.25)',
         backgroundColor: isDrilled
-          ? 'rgba(168,85,247,0.18)'
+          ? 'var(--accent-dim)'
           : covered
-            ? `rgba(168,85,247,${0.06 + intensity * 0.18})`
+            ? `rgba(129,140,248,${0.06 + intensity * 0.18})`
             : 'rgba(255,68,68,0.04)',
         cursor: covered ? 'pointer' : 'default',
         transition: 'all 0.15s',
         minWidth: 0,
       }}
-      onMouseEnter={e => { if (covered) e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'; }}
+      onMouseEnter={e => { if (covered) e.currentTarget.style.borderColor = 'var(--accent)'; }}
       onMouseLeave={e => {
-        if (covered && !isDrilled) e.currentTarget.style.borderColor = `rgba(168,85,247,${0.25 + intensity * 0.5})`;
+        if (covered && !isDrilled) e.currentTarget.style.borderColor = `rgba(129,140,248,${0.25 + intensity * 0.5})`;
         if (!covered) e.currentTarget.style.borderColor = 'rgba(255,68,68,0.25)';
       }}
     >
       {covered && (
         <a href={tacticUrl(tactic.id)} target="_blank" rel="noreferrer"
           onClick={e => e.stopPropagation()}
-          style={{ position: 'absolute', top: '6px', right: '6px', fontSize: '9px', color: 'rgba(168,85,247,0.5)', textDecoration: 'none' }}
+          style={{ position: 'absolute', top: '6px', right: '6px', fontSize: '9px', color: 'var(--accent-border)', textDecoration: 'none' }}
         >↗</a>
       )}
 
-      <div style={{ fontSize: '10px', fontFamily: 'monospace', color: covered ? '#a855f7' : 'rgba(255,68,68,0.5)', marginBottom: '3px' }}>
+      <div style={{ fontSize: '10px', fontFamily: 'monospace', color: covered ? 'var(--accent)' : 'rgba(255,68,68,0.5)', marginBottom: '3px' }}>
         {tactic.id}
       </div>
       <div style={{ fontSize: '11px', fontWeight: 600, color: covered ? 'var(--text-primary)' : 'rgba(255,100,100,0.6)', marginBottom: '6px', lineHeight: 1.3 }}>
@@ -66,13 +66,13 @@ function TacticCell({ tactic, onDrillDown, isDrilled, maxCount }) {
 
       {covered ? (
         <>
-          <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'monospace', color: '#a855f7' }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'monospace', color: 'var(--accent)' }}>
             {tactic.count}
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '4px' }}>incidents</span>
           </div>
           {/* Few-compliant length encoding — comparable across all cards */}
           <div style={{ height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', marginTop: '6px', marginBottom: '6px' }}>
-            <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: '#a855f7', borderRadius: '2px', opacity: 0.75, transition: 'width 0.4s' }} />
+            <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: 'var(--accent)', borderRadius: '2px', opacity: 0.75, transition: 'width 0.4s' }} />
           </div>
           {/* Severity breakdown */}
           {tactic.severity_breakdown && (
@@ -95,10 +95,10 @@ function TacticCell({ tactic, onDrillDown, isDrilled, maxCount }) {
           <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
             {tactic.techniques.length}
             {tactic.total_known_techniques > 0 && (
-              <span style={{ color: 'rgba(168,85,247,0.5)' }}>/{tactic.total_known_techniques}</span>
+              <span style={{ color: 'var(--accent-border)' }}>/{tactic.total_known_techniques}</span>
             )} technique{tactic.techniques.length !== 1 ? 's' : ''} observed
           </div>
-          <div style={{ fontSize: '9px', color: 'rgba(168,85,247,0.6)', marginTop: '4px' }}>
+          <div style={{ fontSize: '9px', color: 'var(--accent-border)', marginTop: '4px' }}>
             {isDrilled ? 'Click to close ▲' : 'Click to explore ▾'}
           </div>
         </>
@@ -151,16 +151,16 @@ function TacticDrillDown({ tactic, allIncidents, clusters, correlations, onClose
       <div style={{
         marginTop: '12px',
         backgroundColor: 'var(--bg-primary)',
-        border: '2px solid rgba(168,85,247,0.35)',
+        border: '2px solid var(--accent-border)',
         borderRadius: '8px', overflow: 'hidden',
       }}>
         {/* Header */}
         <div style={{
           padding: '12px 16px', borderBottom: '1px solid var(--border)',
-          backgroundColor: 'rgba(168,85,247,0.06)',
+          backgroundColor: 'var(--accent-dim)',
           display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
         }}>
-          <span style={{ fontSize: '10px', fontFamily: 'monospace', color: '#a855f7' }}>{tactic.id}</span>
+          <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--accent)' }}>{tactic.id}</span>
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{tactic.name}</span>
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
             {tacticIncidents.length} incident{tacticIncidents.length !== 1 ? 's' : ''}
@@ -170,20 +170,20 @@ function TacticDrillDown({ tactic, allIncidents, clusters, correlations, onClose
               <a key={t} href={techniqueUrl(t)} target="_blank" rel="noreferrer"
                 style={{
                   padding: '1px 6px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
-                  textDecoration: 'none', backgroundColor: 'rgba(168,85,247,0.12)',
-                  border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7', transition: 'border-color 0.15s',
+                  textDecoration: 'none', backgroundColor: 'var(--accent-dim)',
+                  border: '1px solid var(--accent-border)', color: 'var(--accent)', transition: 'border-color 0.15s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.3)'}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--accent-border)'}
               >{t} ↗</a>
             ))}
           </div>
           <a href={tacticUrl(tactic.id)} target="_blank" rel="noreferrer"
             style={{
-              fontSize: '11px', color: '#a855f7', textDecoration: 'none',
+              fontSize: '11px', color: 'var(--accent)', textDecoration: 'none',
               padding: '2px 8px', borderRadius: '4px',
-              border: '1px solid rgba(168,85,247,0.3)',
-              backgroundColor: 'rgba(168,85,247,0.08)',
+              border: '1px solid var(--accent-border)',
+              backgroundColor: 'var(--accent-dim)',
             }}
           >View on MITRE ↗</a>
           <button onClick={onClose} style={{
@@ -224,7 +224,7 @@ function TacticDrillDown({ tactic, allIncidents, clusters, correlations, onClose
                         backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                         transition: 'background 0.1s',
                       }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(168,85,247,0.04)'}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'}
                     >
                       <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-mono)', whiteSpace: 'nowrap', borderBottom: '1px solid var(--border)' }}>
@@ -247,8 +247,8 @@ function TacticDrillDown({ tactic, allIncidents, clusters, correlations, onClose
                               onClick={e => e.stopPropagation()}
                               style={{
                                 padding: '1px 5px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
-                                textDecoration: 'none', backgroundColor: 'rgba(168,85,247,0.18)',
-                                border: '1px solid rgba(168,85,247,0.45)', color: '#c084fc',
+                                textDecoration: 'none', backgroundColor: 'var(--accent-dim)',
+                                border: '1px solid var(--accent-border)', color: 'var(--accent)',
                               }}
                             >{t} ↗</a>
                           ))}
@@ -335,7 +335,7 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
           MITRE ATT&CK Coverage
         </div>
         <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#a855f7' }}>{coveredCount} tactic{coveredCount !== 1 ? 's' : ''} observed</span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent)' }}>{coveredCount} tactic{coveredCount !== 1 ? 's' : ''} observed</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#ff7b7b' }}>{gapCount} coverage gap{gapCount !== 1 ? 's' : ''}</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{total_unique_techniques} unique techniques</span>
           <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
@@ -343,8 +343,8 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
               <button key={mode} onClick={() => setSortMode(mode)} style={{
                 padding: '3px 10px', fontSize: '10px', fontWeight: 600, cursor: 'pointer',
                 border: 'none', borderRight: mode === 'killchain' ? '1px solid var(--border)' : 'none',
-                backgroundColor: sortMode === mode ? 'rgba(168,85,247,0.15)' : 'transparent',
-                color: sortMode === mode ? '#a855f7' : 'var(--text-secondary)',
+                backgroundColor: sortMode === mode ? 'var(--accent-dim)' : 'transparent',
+                color: sortMode === mode ? 'var(--accent)' : 'var(--text-secondary)',
                 transition: 'all 0.15s',
               }}>{label}</button>
             ))}
@@ -396,12 +396,12 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
                     backgroundColor: i % 2 === 0 ? 'var(--bg-primary)' : 'transparent', borderRadius: '4px',
                   }}>
                     <a href={techniqueUrl(item.technique)} target="_blank" rel="noreferrer"
-                      style={{ fontFamily: 'monospace', fontSize: '11px', color: '#a855f7', minWidth: '72px', textDecoration: 'none', fontWeight: 600, transition: 'color 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.color = '#c084fc'}
-                      onMouseLeave={e => e.currentTarget.style.color = '#a855f7'}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--accent)', minWidth: '72px', textDecoration: 'none', fontWeight: 600, transition: 'color 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--accent)'}
                     >{item.technique} ↗</a>
                     <div style={{ flex: 1, height: '5px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
-                      <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: '#a855f7', borderRadius: '2px', opacity: 0.7 }} />
+                      <div style={{ width: `${barPct}%`, height: '100%', backgroundColor: 'var(--accent)', borderRadius: '2px', opacity: 0.7 }} />
                     </div>
                     <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-primary)', minWidth: '24px', textAlign: 'right' }}>{item.count}</span>
                     <span style={{ fontSize: '10px', color: 'var(--text-secondary)', minWidth: '130px' }}>{item.tactic_name}</span>

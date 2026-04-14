@@ -94,7 +94,7 @@ function SortHeader({ label, col, sortCol, sortDir, onSort, style = {} }) {
       style={{
         padding: '0 8px', fontSize: '10px', fontWeight: 600,
         textTransform: 'uppercase', letterSpacing: '0.08em',
-        color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+        color: active ? 'var(--accent)' : 'var(--text-secondary)',
         cursor: 'pointer', userSelect: 'none',
         display: 'flex', alignItems: 'center', gap: '4px',
         transition: 'color 0.15s',
@@ -232,11 +232,11 @@ function CampaignRow({ cluster, correlations, allIncidents, incidentMap, isExpan
                         target="_blank" rel="noopener noreferrer"
                         style={{
                           padding: '3px 8px', borderRadius: '3px', fontSize: '11px', fontFamily: 'monospace',
-                          backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
-                          color: '#a855f7', textDecoration: 'none', transition: 'border-color 0.15s',
+                          backgroundColor: 'var(--accent-dim)', border: '1px solid var(--accent-border)',
+                          color: 'var(--accent)', textDecoration: 'none', transition: 'border-color 0.15s',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.3)'}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--accent-border)'}
                       >{t} ↗</a>
                     ))}
                   </div>

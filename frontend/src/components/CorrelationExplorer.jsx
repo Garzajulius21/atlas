@@ -190,7 +190,7 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
         {/* Shared signals summary */}
         <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {pair.shared_mitre?.length > 0 && (
-            <span style={{ fontSize: '10px', fontFamily: 'monospace', color: '#a855f7', backgroundColor: 'rgba(168,85,247,0.12)', padding: '2px 7px', borderRadius: '3px' }}>
+            <span style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--accent)', backgroundColor: 'var(--accent-dim)', padding: '2px 7px', borderRadius: '3px' }}>
               {pair.shared_mitre.length} technique{pair.shared_mitre.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -247,9 +247,9 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
                       onClick={e => e.stopPropagation()}
                       style={{
                         fontSize: '10px', fontFamily: 'monospace', fontWeight: 700,
-                        color: '#a855f7', backgroundColor: 'rgba(168,85,247,0.15)',
+                        color: 'var(--accent)', backgroundColor: 'var(--accent-dim)',
                         padding: '2px 6px', borderRadius: '3px',
-                        textDecoration: 'none', border: '1px solid rgba(168,85,247,0.3)',
+                        textDecoration: 'none', border: '1px solid var(--accent-border)',
                       }}
                     >
                       {t} ↗

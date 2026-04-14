@@ -57,8 +57,8 @@ function MitreTags({ techniques }) {
       {shown.map(t => (
         <span key={t} style={{
           padding: '1px 6px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
-          backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
-          color: '#a855f7', whiteSpace: 'nowrap'
+          backgroundColor: 'var(--accent-dim)', border: '1px solid var(--accent-border)',
+          color: 'var(--accent)', whiteSpace: 'nowrap'
         }}>{t}</span>
       ))}
       {extra > 0 && (
@@ -173,15 +173,15 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
   const filterBtnStyle = (active) => ({
     padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
     fontFamily: 'monospace', cursor: 'pointer',
-    border: active ? '1px solid var(--accent-blue)' : '1px solid var(--border)',
-    backgroundColor: active ? 'rgba(245,158,11,0.1)' : 'transparent',
-    color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+    border: active ? '1px solid var(--accent-border)' : '1px solid var(--border)',
+    backgroundColor: active ? 'var(--accent-dim)' : 'transparent',
+    color: active ? 'var(--accent)' : 'var(--text-secondary)',
     transition: 'all 0.15s'
   });
 
   const sortIndicator = (field) => {
     if (!field || sortCol !== field) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>;
-    return <span style={{ marginLeft: '4px', color: 'var(--accent-blue)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    return <span style={{ marginLeft: '4px', color: 'var(--accent)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   // Severity counts across ALL incidents (not filtered) for the summary bar
@@ -319,10 +319,10 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
                     style={{
                       cursor: 'pointer',
                       backgroundColor: isSelected
-                        ? 'rgba(245,158,11,0.06)'
+                        ? 'var(--accent-dim)'
                         : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                       transition: 'background 0.1s',
-                      outline: isSelected ? '1px solid rgba(245,158,11,0.3)' : 'none',
+                      outline: isSelected ? '1px solid var(--accent-border)' : 'none',
                     }}
                     onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
                     onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'; }}

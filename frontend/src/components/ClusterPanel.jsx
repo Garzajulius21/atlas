@@ -115,11 +115,11 @@ function ClusterCard({ cluster, correlations, allIncidents }) {
                   rel="noopener noreferrer"
                   style={{
                     padding: '2px 7px', borderRadius: '3px', fontSize: '10px', fontFamily: 'monospace',
-                    backgroundColor: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
-                    color: '#a855f7', textDecoration: 'none', transition: 'border-color 0.15s',
+                    backgroundColor: 'var(--accent-dim)', border: '1px solid var(--accent-border)',
+                    color: 'var(--accent)', textDecoration: 'none', transition: 'border-color 0.15s',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.3)'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--accent-border)'}
                 >{t} ↗</a>
               ))}
             </div>
@@ -198,7 +198,7 @@ export default function ClusterPanel({ data, correlations, allIncidents }) {
           Campaign Clusters
         </div>
         <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#a855f7' }}>{total_clusters} campaign{total_clusters !== 1 ? 's' : ''}</span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent)' }}>{total_clusters} campaign{total_clusters !== 1 ? 's' : ''}</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{total_noise} isolated</span>
         </div>
       </div>

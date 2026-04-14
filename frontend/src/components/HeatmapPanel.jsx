@@ -170,7 +170,7 @@ function DeptRow({ dept, rank, maxScore, allIncidents, clusters, isLast }) {
           {dept.top_techniques.slice(0, 3).map(t => (
             <span key={t} style={{
               padding: '1px 5px', borderRadius: '3px', fontSize: '9px', fontFamily: 'monospace',
-              backgroundColor: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)', color: '#a855f7',
+              backgroundColor: 'var(--accent-dim)', border: '1px solid var(--accent-border)', color: 'var(--accent)',
             }}>{t}</span>
           ))}
         </div>

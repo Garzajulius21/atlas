@@ -139,7 +139,7 @@ export default function CampaignExplainer({ cluster, correlations }) {
                 rel="noreferrer"
                 style={{ textDecoration: 'none' }}
               >
-                <Tag color="#a855f7">{t} ↗</Tag>
+                <Tag color="var(--accent)">{t} ↗</Tag>
               </a>
             ))}
           </div>

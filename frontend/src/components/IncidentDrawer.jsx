@@ -194,11 +194,11 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
             <Section title="Campaign">
               <div style={{
                 padding: '10px 14px',
-                backgroundColor: 'rgba(168,85,247,0.08)',
-                border: '1px solid rgba(168,85,247,0.3)',
+                backgroundColor: 'var(--accent-dim)',
+                border: '1px solid var(--accent-border)',
                 borderRadius: '6px',
               }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#a855f7', marginBottom: '4px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)', marginBottom: '4px' }}>
                   {campaign.label}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
@@ -227,16 +227,16 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '8px 12px',
-                      backgroundColor: 'rgba(168,85,247,0.08)',
-                      border: '1px solid rgba(168,85,247,0.25)',
+                      backgroundColor: 'var(--accent-dim)',
+                      border: '1px solid var(--accent-border)',
                       borderRadius: '6px',
                       textDecoration: 'none',
                       transition: 'border-color 0.15s',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.6)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(168,85,247,0.25)'}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--accent-border)'}
                   >
-                    <span style={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 600, color: '#a855f7' }}>{t}</span>
+                    <span style={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)' }}>{t}</span>
                     <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>attack.mitre.org ↗</span>
                   </a>
                 ))}
@@ -296,8 +296,8 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
                           {pair.shared_mitre.map(t => (
                             <span key={t} style={{
                               fontSize: '9px', fontFamily: 'monospace', padding: '1px 5px',
-                              borderRadius: '3px', backgroundColor: 'rgba(168,85,247,0.12)',
-                              border: '1px solid rgba(168,85,247,0.25)', color: '#a855f7'
+                              borderRadius: '3px', backgroundColor: 'var(--accent-dim)',
+                              border: '1px solid var(--accent-border)', color: 'var(--accent)'
                             }}>{t}</span>
                           ))}
                         </div>
