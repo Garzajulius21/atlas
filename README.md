@@ -138,3 +138,7 @@ No write permissions. No Global Admin. See `SPEC.md` for full KQL queries and th
 ## Sample Data
 
 A `sample-incidents.csv` file is included in the repository root for testing and demonstration purposes. All data is synthetic — no real incidents, no real PII.
+
+---
+
+*Built by Julius Garza — SOC analyst tooling for threat correlation, campaign detection, and security briefing generation.*
