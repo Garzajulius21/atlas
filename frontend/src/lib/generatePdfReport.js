@@ -7,11 +7,11 @@
 // ── Lookup tables ─────────────────────────────────────────────────────────────
 
 const SEVERITY_COLOR = {
-  High: '#c0392b', Medium: '#d68910', Low: '#1a5276', Informational: '#717d7e',
+  High: '#dc2626', Medium: '#ea580c', Low: '#d97706', Informational: '#64748b',
 };
 
 const PRIORITY_COLOR = {
-  Critical: '#c0392b', High: '#d68910', Medium: '#1a5276', Low: '#717d7e',
+  Critical: '#dc2626', High: '#ea580c', Medium: '#d97706', Low: '#64748b',
 };
 
 const CONTROL_OWNER = {
@@ -90,9 +90,9 @@ function humanTime(hours) {
 function overallRisk(clusters, recommendations) {
   const critRecs = (recommendations?.recommendations || []).filter(r => r.priority === 'Critical').length;
   const hasHighCampaign = (clusters?.clusters || []).some(c => (c.severity_breakdown?.High || 0) >= 2);
-  if (hasHighCampaign || critRecs >= 3) return { label: 'CRITICAL', color: '#c0392b', bg: '#fdedec', desc: 'Immediate action required. Active high-severity campaigns detected.' };
-  if (critRecs >= 1)                    return { label: 'HIGH',     color: '#d68910', bg: '#fef9e7', desc: 'Significant threat activity. Address critical recommendations urgently.' };
-  return                                       { label: 'MEDIUM',   color: '#1a5276', bg: '#eaf2ff', desc: 'Moderate activity detected. Work through recommendations in priority order.' };
+  if (hasHighCampaign || critRecs >= 3) return { label: 'CRITICAL', color: '#dc2626', bg: '#fef2f2', desc: 'Immediate action required. Active high-severity campaigns detected.' };
+  if (critRecs >= 1)                    return { label: 'HIGH',     color: '#ea580c', bg: '#fff7ed', desc: 'Significant threat activity. Address critical recommendations urgently.' };
+  return                                       { label: 'MEDIUM',   color: '#4f46e5', bg: '#eef2ff', desc: 'Moderate activity detected. Work through recommendations in priority order.' };
 }
 
 // ── Narrative generator ───────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ function buildNarrative(incidents, clusters, mitre, heatmap, recommendations) {
 
 // ── Visual components ─────────────────────────────────────────────────────────
 
-function hbar(value, max, color = '#2c3e50', height = 10) {
+function hbar(value, max, color = '#4f46e5', height = 10) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return `
     <div style="display:flex;align-items:center;gap:8px;">
@@ -207,22 +207,22 @@ function css() {
     body { font-family: 'Inter', -apple-system, sans-serif; font-size: 11px; color: #1a1a1a; background:#fff; line-height:1.5; }
     .page { width:210mm; min-height:297mm; padding:16mm 18mm 14mm; margin:0 auto; page-break-after:always; }
     .page:last-child { page-break-after:avoid; }
-    h2 { font-size:11px; font-weight:700; color:#111; border-bottom:2px solid #111; padding-bottom:4px; margin:20px 0 10px; text-transform:uppercase; letter-spacing:0.08em; }
+    h2 { font-size:11px; font-weight:700; color:#111; border-bottom:2px solid #4f46e5; padding-bottom:4px; margin:20px 0 10px; text-transform:uppercase; letter-spacing:0.08em; }
     table { width:100%; border-collapse:collapse; font-size:11px; }
-    th { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:#555; padding:5px 8px; border-bottom:1px solid #bbb; text-align:left; background:#f9f9f9; }
+    th { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:#4f46e5; padding:5px 8px; border-bottom:2px solid #e0e7ff; text-align:left; background:#f5f3ff; }
     td { padding:6px 8px; border-bottom:1px solid #ebebeb; vertical-align:middle; }
     tr:last-child td { border-bottom:none; }
     .metric-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0; }
-    .metric { background:#f7f7f7; border-radius:4px; padding:11px 14px; border-left:3px solid #ddd; }
+    .metric { background:#fafafa; border-radius:6px; padding:11px 14px; border-left:3px solid #e0e7ff; border:1px solid #e0e7ff; border-left:3px solid #4f46e5; }
     .metric-val { font-size:26px; font-weight:700; color:#111; line-height:1; font-variant-numeric:tabular-nums; }
     .metric-label { font-size:9px; color:#777; margin-top:3px; text-transform:uppercase; letter-spacing:0.07em; }
-    .narrative { font-size:12px; color:#333; line-height:1.8; padding:14px 16px; background:#fafafa; border-left:3px solid #2c3e50; border-radius:0 4px 4px 0; margin-bottom:14px; }
-    .risk-banner { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:4px; margin-bottom:12px; }
+    .narrative { font-size:12px; color:#333; line-height:1.8; padding:14px 16px; background:#f5f3ff; border-left:3px solid #4f46e5; border-radius:0 4px 4px 0; margin-bottom:14px; }
+    .risk-banner { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:6px; margin-bottom:12px; }
     .action-row { display:grid; grid-template-columns:70px 1fr 110px 90px; gap:10px; align-items:start; padding:8px 0; border-bottom:1px solid #ebebeb; }
     .action-row:last-child { border-bottom:none; }
     .footer { font-size:9px; color:#aaa; text-align:center; margin-top:16px; padding-top:8px; border-top:1px solid #e0e0e0; }
-    .appendix { background:#f9f9f9; border-radius:4px; padding:10px 14px; margin-top:16px; }
-    .appendix-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#555; margin-bottom:6px; }
+    .appendix { background:#f5f3ff; border-radius:6px; padding:10px 14px; margin-top:16px; border:1px solid #e0e7ff; }
+    .appendix-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#4f46e5; margin-bottom:6px; }
     .appendix-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; }
     .appendix-item { font-size:10px; color:#555; }
     .appendix-item strong { color:#333; }
@@ -266,9 +266,9 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
   const deptRows = topDepts.map(d => `
     <tr>
       <td>${d.name}</td>
-      <td style="width:150px;">${hbar(d.risk_score, maxRisk, '#2c3e50', 8)}</td>
+      <td style="width:150px;">${hbar(d.risk_score, maxRisk, '#4f46e5', 8)}</td>
       <td style="text-align:center;">${d.total}</td>
-      <td style="text-align:center;color:${SEVERITY_COLOR.High};font-weight:600;">${d.severity_breakdown?.High || 0}</td>
+      <td style="text-align:center;color:#dc2626;font-weight:600;">${d.severity_breakdown?.High || 0}</td>
       <td style="font-size:10px;color:#555;">${(d.top_techniques || []).slice(0,2).join(', ') || '—'}</td>
     </tr>`).join('');
 
@@ -287,9 +287,9 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
   <div class="page">
 
     <!-- Header -->
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #111;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:3px solid #4f46e5;">
       <div>
-        <div style="font-size:24px;font-weight:700;letter-spacing:-0.5px;color:#111;line-height:1;">ATLAS</div>
+        <div style="font-size:24px;font-weight:700;letter-spacing:-0.5px;color:#4f46e5;line-height:1;">ATLAS</div>
         <div style="font-size:12px;color:#555;margin-top:3px;">Threat Correlation &amp; Clustering — Executive Briefing</div>
       </div>
       <div style="text-align:right;">
@@ -309,19 +309,19 @@ function page1(date, incidents, clusters, mitre, heatmap, recommendations) {
 
     <!-- Metrics -->
     <div class="metric-grid">
-      <div class="metric" style="border-left-color:#2c3e50;">
+      <div class="metric">
         <div class="metric-val">${totalInc}</div>
         <div class="metric-label">Incidents Analysed${dateRange ? `<br/><span style="font-size:8px;color:#aaa;text-transform:none;letter-spacing:0;">${dateRange}</span>` : ''}</div>
       </div>
-      <div class="metric" style="border-left-color:${totalCamp > 0 ? '#c0392b' : '#27ae60'};">
-        <div class="metric-val" style="color:${totalCamp > 0 ? '#c0392b' : '#27ae60'};">${totalCamp}</div>
+      <div class="metric" style="border-left-color:${totalCamp > 0 ? '#dc2626' : '#16a34a'};">
+        <div class="metric-val" style="color:${totalCamp > 0 ? '#dc2626' : '#16a34a'};">${totalCamp}</div>
         <div class="metric-label">Campaigns Detected</div>
       </div>
-      <div class="metric" style="border-left-color:${gaps > 0 ? '#d68910' : '#27ae60'};">
-        <div class="metric-val" style="color:${gaps > 0 ? '#d68910' : '#27ae60'};">${gaps}</div>
+      <div class="metric" style="border-left-color:${gaps > 0 ? '#ea580c' : '#16a34a'};">
+        <div class="metric-val" style="color:${gaps > 0 ? '#ea580c' : '#16a34a'};">${gaps}</div>
         <div class="metric-label">Detection Gaps</div>
       </div>
-      <div class="metric" style="border-left-color:#2c3e50;">
+      <div class="metric">
         <div class="metric-val">${totalRecs}</div>
         <div class="metric-label">Recommendations</div>
       </div>
@@ -411,7 +411,7 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
       <tr>
         <td style="font-family:monospace;font-size:10px;color:#333;">${t.id}</td>
         <td>${t.name}</td>
-        <td style="text-align:center;color:#27ae60;font-weight:700;font-size:13px;">✓</td>
+        <td style="text-align:center;color:#16a34a;font-weight:700;font-size:13px;">✓</td>
         <td style="text-align:center;font-weight:600;">${t.count}</td>
         <td style="font-family:monospace;font-size:9px;color:#555;">${t.techniques.slice(0,5).join(', ') || '—'}</td>
       </tr>`),
@@ -419,9 +419,9 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
       <tr>
         <td style="font-family:monospace;font-size:10px;color:#aaa;">${id}</td>
         <td style="color:#aaa;">${TACTIC_NAMES[id] || id}</td>
-        <td style="text-align:center;color:#c0392b;font-weight:700;font-size:13px;">✗</td>
+        <td style="text-align:center;color:#dc2626;font-weight:700;font-size:13px;">✗</td>
         <td style="text-align:center;color:#aaa;">0</td>
-        <td style="font-size:9px;color:#c0392b;">No detections — coverage gap</td>
+        <td style="font-size:9px;color:#dc2626;">No detections — coverage gap</td>
       </tr>`),
   ].join('');
 
@@ -441,7 +441,7 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
   const pairRows = pairs.map(p => {
     const titleA = incMap[p.a]?.Title || p.a;
     const titleB = incMap[p.b]?.Title || p.b;
-    const sc = p.score >= 0.75 ? '#c0392b' : p.score >= 0.55 ? '#d68910' : '#1a5276';
+    const sc = p.score >= 0.75 ? '#dc2626' : p.score >= 0.55 ? '#ea580c' : '#4f46e5';
     return `
     <tr>
       <td>
@@ -461,9 +461,9 @@ function page2(incidents, clusters, mitre, heatmap, recommendations, correlation
   return `
   <div class="page">
 
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #111;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:3px solid #4f46e5;">
       <div>
-        <div style="font-size:18px;font-weight:700;color:#111;">ATLAS — Technical Report</div>
+        <div style="font-size:18px;font-weight:700;color:#4f46e5;">ATLAS — Technical Report</div>
         <div style="font-size:11px;color:#555;margin-top:2px;">For security operations and engineering teams</div>
       </div>
       <div style="text-align:right;">
