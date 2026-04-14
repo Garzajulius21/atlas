@@ -99,25 +99,27 @@ export default function IncidentDrawer({ incident, clusters, correlations, allIn
     <>
       {/* Backdrop */}
       <div
+        className="backdrop-fade-in"
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.55)',
           zIndex: 100,
-          backdropFilter: 'blur(2px)',
+          backdropFilter: 'blur(3px)',
         }}
       />
 
       {/* Drawer */}
-      <div style={{
+      <div className="drawer-slide-in" style={{
         position: 'fixed', top: 0, right: 0, bottom: 0,
-        width: '460px',
+        width: '480px',
         backgroundColor: 'var(--bg-surface)',
         borderLeft: '1px solid var(--border)',
         zIndex: 101,
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
+        boxShadow: '-8px 0 40px rgba(0,0,0,0.4)',
       }}>
 
         {/* Header */}

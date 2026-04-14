@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import Tooltip from './Tooltip.jsx';
 
 const SEVERITY_ORDER = ['High', 'Medium', 'Low', 'Informational'];
 
@@ -38,12 +39,14 @@ function RiskBar({ score, maxScore }) {
   const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
   const { color } = riskLevel(pct);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '3px', transition: 'width 0.4s' }} />
+    <Tooltip text="Severity-weighted incident count: High ×4 · Medium ×2 · Low ×1. Bar shows relative exposure vs. highest-risk department.">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+        <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '3px', transition: 'width 0.4s' }} />
+        </div>
+        <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right' }}>{score}</span>
       </div>
-      <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right' }}>{score}</span>
-    </div>
+    </Tooltip>
   );
 }
 

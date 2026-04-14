@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import CampaignExplainer from './CampaignExplainer.jsx';
 import IncidentDrawer from './IncidentDrawer.jsx';
+import Tooltip from './Tooltip.jsx';
 
 const CLUSTER_COLORS = [
   '#f97316','#8b5cf6','#2dd4bf','#f43f5e','#38bdf8',
@@ -73,15 +74,20 @@ function CohesionPill({ value }) {
   const pct             = Math.round(value * 100);
   const { label, color } = cohesionVerdict(value);
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-        <div style={{ width: '52px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
-          <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '2px' }} />
+    <Tooltip
+      text="Campaign cohesion measures how tightly linked the incidents are across shared entities, techniques, timing, and severity. ≥85% = Confirmed · ≥68% = Highly likely · ≥50% = Probable · ≥30% = Possible"
+      maxWidth={260}
+    >
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+          <div style={{ width: '52px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
+            <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '2px' }} />
+          </div>
+          <span style={{ fontSize: '10px', fontFamily: 'monospace', color }}>{pct}%</span>
         </div>
-        <span style={{ fontSize: '10px', fontFamily: 'monospace', color }}>{pct}%</span>
+        <div style={{ fontSize: '9px', color, opacity: 0.85 }}>{label}</div>
       </div>
-      <div style={{ fontSize: '9px', color, opacity: 0.85 }}>{label}</div>
-    </div>
+    </Tooltip>
   );
 }
 

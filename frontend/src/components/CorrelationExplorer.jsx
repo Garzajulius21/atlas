@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import IncidentDrawer from './IncidentDrawer.jsx';
+import Tooltip from './Tooltip.jsx';
 
 const SEV_COLOR = {
   High: '#ff7b7b',
@@ -157,18 +158,20 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
       >
         {/* Score */}
-        <div style={{ width: '72px', flexShrink: 0 }}>
-          <div style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'monospace', color: col, lineHeight: 1 }}>
-            {Math.round(sc * 100)}%
+        <Tooltip text="Weighted correlation score: 35% shared entities · 30% MITRE technique overlap · 25% time proximity · 10% severity match. ≥75% = Very Strong · ≥55% = Strong · ≥40% = Moderate" maxWidth={250}>
+          <div style={{ width: '72px', flexShrink: 0 }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'monospace', color: col, lineHeight: 1 }}>
+              {Math.round(sc * 100)}%
+            </div>
+            <div style={{ fontSize: '9px', color: col, fontWeight: 600, marginTop: '2px' }}>
+              {scoreLabel(sc)}
+            </div>
+            {/* Bar */}
+            <div style={{ marginTop: '4px', height: '3px', borderRadius: '2px', backgroundColor: 'var(--border)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${sc * 100}%`, backgroundColor: col, borderRadius: '2px' }} />
+            </div>
           </div>
-          <div style={{ fontSize: '9px', color: col, fontWeight: 600, marginTop: '2px' }}>
-            {scoreLabel(sc)}
-          </div>
-          {/* Bar */}
-          <div style={{ marginTop: '4px', height: '3px', borderRadius: '2px', backgroundColor: 'var(--border)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${sc * 100}%`, backgroundColor: col, borderRadius: '2px' }} />
-          </div>
-        </div>
+        </Tooltip>
 
         {/* Incident titles */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
