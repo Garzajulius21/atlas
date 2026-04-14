@@ -65,7 +65,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px' }}>
-              📊 PDF Report
+              PDF Report
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               Two-page designed report — executive summary<br />
@@ -85,7 +85,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px' }}>
-              {'{ }'} JSON Export (.json)
+              JSON Export (.json)
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               Machine-readable full dataset.<br />
@@ -98,7 +98,7 @@ export default function ExportButton({ incidents, clusters, correlations, mitre,
             fontSize: '10px', color: 'var(--text-secondary)',
             backgroundColor: 'var(--bg-elevated)',
           }}>
-            🔒 All PII remains SHA-256 hashed in exports
+            All PII remains SHA-256 hashed in exports
           </div>
         </div>
       )}

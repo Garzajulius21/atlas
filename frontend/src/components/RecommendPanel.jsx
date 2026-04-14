@@ -204,7 +204,7 @@ export default function RecommendPanel({ data }) {
                 border: '1px solid var(--border)', backgroundColor: 'transparent',
                 color: 'var(--text-secondary)', transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b80'; e.currentTarget.style.color = '#f59e0b'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.color = 'var(--accent)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
             >
               Clear filters

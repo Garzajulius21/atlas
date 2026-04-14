@@ -410,7 +410,7 @@ export default function CampaignsTab({ clusters, correlations, allIncidents }) {
           <SortHeader label="Campaign"    col="id"        sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={headerPad} />
           <SortHeader label="Severity"    col="severity"  sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={colPad} />
           <SortHeader label="Time Window" col="firstSeen" sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={colPad} />
-          <SortHeader label="Incidents"   col="size"      sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={{ ...colPad, textAlign: 'center' }} />
+          <SortHeader label="Incidents"   col="size"      sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={{ ...colPad, justifyContent: 'center' }} />
           <SortHeader label="Confidence"  col="cohesion"  sortCol={sortCol} sortDir={sortDir} onSort={handleSort} style={colPad} />
           <div />
         </div>
