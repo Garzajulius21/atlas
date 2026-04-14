@@ -7,6 +7,12 @@
 
 ---
 
+![Campaign Intelligence tab showing coordinated attack campaigns with confidence tiers](docs/campaigns.png)
+
+![Executive briefing PDF — page 1 showing overall risk level, metrics, and prioritised actions](docs/pdf-preview.png)
+
+---
+
 ## Overview
 
 ATLAS is a local, privacy-first threat correlation and clustering framework for SOC analysts and incident responders. Upload a CSV export of Microsoft Defender incidents and ATLAS automatically:
