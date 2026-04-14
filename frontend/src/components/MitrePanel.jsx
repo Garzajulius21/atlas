@@ -331,12 +331,17 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
 
       {/* Header */}
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
-          MITRE ATT&CK Coverage
+        <div style={{ paddingLeft: '12px', borderLeft: '3px solid var(--accent)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
+            MITRE ATT&CK Coverage
+          </div>
+          <div style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'monospace', color: 'var(--text-primary)', lineHeight: 1.2, marginTop: '2px' }}>
+            {coveredCount}
+            <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '6px' }}>tactic{coveredCount !== 1 ? 's' : ''} observed</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent)' }}>{coveredCount} tactic{coveredCount !== 1 ? 's' : ''} observed</span>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#ff7b7b' }}>{gapCount} coverage gap{gapCount !== 1 ? 's' : ''}</span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#ff7b7b' }}>{gapCount} gap{gapCount !== 1 ? 's' : ''}</span>
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{total_unique_techniques} unique techniques</span>
           <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
             {[['killchain', 'Kill Chain'], ['active', 'Most Active']].map(([mode, label]) => (
@@ -356,7 +361,7 @@ export default function MitrePanel({ data, allIncidents, clusters, correlations 
 
         {/* Hint */}
         <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-          Purple = incidents observed · <span style={{ color: 'rgba(255,100,100,0.7)' }}>Red border = coverage gap</span> · Click a covered tactic to drill down · ↗ opens MITRE ATT&CK
+          Indigo = incidents observed · <span style={{ color: 'rgba(255,100,100,0.7)' }}>Red border = coverage gap</span> · Click a covered tactic to drill down · ↗ opens MITRE ATT&CK
         </div>
 
         {/* Tactic grid */}

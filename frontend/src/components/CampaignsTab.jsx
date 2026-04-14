@@ -343,8 +343,52 @@ export default function CampaignsTab({ clusters, correlations, allIncidents }) {
   const headerPad = { padding: '0 12px' };
   const colPad    = { padding: '0 8px' };
 
+  const totalIncidentsInCampaigns = clusterList.reduce((s, c) => s + c.size, 0);
+  const noiseCount = noise?.length || 0;
+  const highConfidence = clusterList.filter(c => c.cohesion >= 0.68).length;
+
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+      {/* Summary header card */}
+      <div style={{
+        backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: '10px', padding: '16px 20px',
+        display: 'flex', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap',
+      }}>
+        <div style={{ paddingLeft: '12px', borderLeft: '3px solid var(--accent)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+            Campaign Intelligence
+          </div>
+          <div style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'monospace', color: 'var(--text-primary)', lineHeight: 1 }}>
+            {clusterList.length}
+            <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '6px' }}>
+              campaign{clusterList.length !== 1 ? 's' : ''} detected
+            </span>
+          </div>
+          {highConfidence > 0 && (
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '6px' }}>
+              <span style={{ color: '#ff7b7b', fontWeight: 600 }}>{highConfidence}</span> highly likely or confirmed
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {[
+            { label: 'Incidents in campaigns', value: totalIncidentsInCampaigns, color: 'var(--accent)' },
+            { label: 'Isolated incidents',     value: noiseCount,               color: 'var(--text-secondary)' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{
+              padding: '8px 14px', backgroundColor: 'var(--bg-input)',
+              border: '1px solid var(--border)', borderRadius: '6px', minWidth: '120px',
+            }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{label}</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'monospace', color }}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
 
         {/* Sortable table header */}

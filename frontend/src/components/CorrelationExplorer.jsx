@@ -409,7 +409,7 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
               border: '1px solid var(--border)', backgroundColor: 'transparent',
               color: 'var(--text-secondary)', transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b80'; e.currentTarget.style.color = '#f59e0b'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.color = 'var(--accent)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >
             Clear filters
@@ -425,7 +425,7 @@ export default function CorrelationExplorer({ correlations, allIncidents, cluste
             <input
               type="range" min={20} max={90} step={5} value={minScore}
               onChange={e => setMinScore(Number(e.target.value))}
-              style={{ width: '100px', accentColor: '#f59e0b', cursor: 'pointer' }}
+              style={{ width: '100px', accentColor: '#818cf8', cursor: 'pointer' }}
             />
           </div>
           <input

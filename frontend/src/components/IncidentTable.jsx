@@ -246,8 +246,11 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginRight: '4px' }}>
             Incidents
           </div>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent-blue)' }}>
-            {filtered.length} / {incidents.length}
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--accent)' }}>
+            {filtered.length}
+          </span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
+            / {incidents.length}
           </span>
 
           <input
@@ -264,14 +267,30 @@ export default function IncidentTable({ incidents, clusters, correlations }) {
           />
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            {['All', 'Active', 'In Progress', 'Resolved', 'Closed'].map(s => (
-              <button key={s} style={filterBtnStyle(statusFilter === s)} onClick={() => handleStatus(s)}>{s}</button>
-            ))}
+            {[
+              { label: 'All',         color: null },
+              { label: 'Active',      color: '#f87171' },
+              { label: 'In Progress', color: '#fb923c' },
+              { label: 'Resolved',    color: '#34d399' },
+              { label: 'Closed',      color: '#64748b' },
+            ].map(({ label, color }) => {
+              const active = statusFilter === label;
+              const c = active && color ? color : null;
+              return (
+                <button key={label}
+                  onClick={() => handleStatus(label)}
+                  style={{
+                    padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
+                    fontFamily: 'monospace', cursor: 'pointer',
+                    border: `1px solid ${c ? c + '60' : 'var(--border)'}`,
+                    backgroundColor: c ? c + '18' : 'transparent',
+                    color: c || 'var(--text-secondary)',
+                    transition: 'all 0.15s',
+                  }}
+                >{label}</button>
+              );
+            })}
           </div>
-
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic', marginLeft: 'auto' }}>
-            Sorted by newest · click any row to inspect
-          </span>
         </div>
 
         {/* Table */}
