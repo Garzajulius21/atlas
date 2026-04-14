@@ -11,8 +11,8 @@ import CampaignExplainer from './CampaignExplainer.jsx';
 import IncidentDrawer from './IncidentDrawer.jsx';
 
 const CLUSTER_COLORS = [
-  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
-  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+  '#f97316','#8b5cf6','#2dd4bf','#f43f5e','#38bdf8',
+  '#84cc16','#34d399','#fb923c','#a78bfa','#22d3ee',
 ];
 const ISOLATED_COLOR  = '#6b7280';
 const SEVERITY_COLORS = { High: '#ff7b7b', Medium: '#ffaa33', Low: '#f59e0b', Informational: '#5a7a9a' };
@@ -207,7 +207,7 @@ function CampaignRow({ cluster, correlations, allIncidents, incidentMap, isExpan
 
       {/* ── Expanded detail — no extra clicks needed ── */}
       {isExpanded && (
-        <div style={{
+        <div className="expand-in" style={{
           borderBottom: '1px solid var(--border)',
           backgroundColor: 'var(--bg-primary)',
           padding: '16px 20px',

@@ -13,15 +13,15 @@ const STATUS_COLORS = {
   New:           { text: '#ff7b7b' },
   InProgress:    { text: '#ffaa33' },
   'In Progress': { text: '#ffaa33' },
-  Resolved:      { text: '#00ff88' },
+  Resolved:      { text: '#34d399' },
   Closed:        { text: '#5a7a9a' },
 };
 
 const SEV_ORDER = { High: 0, Medium: 1, Low: 2, Informational: 3 };
 
 const CLUSTER_COLORS = [
-  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
-  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+  '#f97316','#8b5cf6','#2dd4bf','#f43f5e','#38bdf8',
+  '#84cc16','#34d399','#fb923c','#a78bfa','#22d3ee',
 ];
 
 function getClusterColor(clusterId) {
@@ -71,7 +71,7 @@ function MitreTags({ techniques }) {
 }
 
 const CELL = {
-  padding: '10px 12px', borderBottom: '1px solid var(--border)',
+  padding: '13px 16px', borderBottom: '1px solid var(--border)',
   fontSize: '12px', color: 'var(--text-primary)', verticalAlign: 'middle',
 };
 

@@ -125,6 +125,10 @@ body {
   animation: atlas-fade-in var(--transition-base) both;
 }
 
+.expand-in {
+  animation: atlas-fade-in 0.15s ease both;
+}
+
 /* ── Skeleton loader ─────────────────────────────────────────────────────────── */
 .skeleton-block {
   border-radius: var(--radius-sm);

@@ -7,16 +7,16 @@ import IncidentDrawer from './IncidentDrawer.jsx';
 import CampaignExplainer from './CampaignExplainer.jsx';
 
 const CLUSTER_COLORS = [
-  '#f59e0b', // amber   — campaign 1
-  '#a855f7', // purple  — campaign 2
-  '#00ff88', // green   — campaign 3
-  '#ff7b7b', // red     — campaign 4
-  '#38bdf8', // sky     — campaign 5
-  '#fb7185', // rose    — campaign 6
-  '#34d399', // emerald — campaign 7
-  '#fbbf24', // yellow  — campaign 8
-  '#c084fc', // violet  — campaign 9
-  '#f97316', // orange  — campaign 10
+  '#f97316', // orange   — campaign 1
+  '#8b5cf6', // violet   — campaign 2
+  '#2dd4bf', // teal     — campaign 3
+  '#f43f5e', // rose     — campaign 4
+  '#38bdf8', // sky      — campaign 5
+  '#84cc16', // lime     — campaign 6
+  '#34d399', // emerald  — campaign 7
+  '#fb923c', // amber    — campaign 8
+  '#a78bfa', // lavender — campaign 9
+  '#22d3ee', // cyan     — campaign 10
 ];
 
 const ISOLATED_COLOR = '#6b7280'; // visible muted grey
@@ -38,7 +38,7 @@ function CustomTooltip({ active, payload }) {
 
   return (
     <div style={{
-      backgroundColor: '#13100a',
+      backgroundColor: 'var(--bg-elevated)',
       border: `1px solid ${color}55`,
       borderRadius: '8px',
       padding: '10px 14px',
@@ -46,26 +46,26 @@ function CustomTooltip({ active, payload }) {
       maxWidth: '280px',
       boxShadow: `0 4px 20px rgba(0,0,0,0.5)`,
     }}>
-      <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#7a6a4a', marginBottom: '4px' }}>
+      <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
         {d.incidentId}
       </div>
-      <div style={{ color: '#e8dcc8', fontWeight: 600, marginBottom: '6px', lineHeight: 1.4 }}>
+      <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '6px', lineHeight: 1.4 }}>
         {d.title}
       </div>
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '10px', fontFamily: 'monospace', color, fontWeight: 700 }}>
           {d.clusterLabel}
         </span>
-        <span style={{ fontSize: '10px', color: '#7a6a4a' }}>·</span>
-        <span style={{ fontSize: '10px', color: '#7a6a4a' }}>{d.severity}</span>
+        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>·</span>
+        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{d.severity}</span>
         {d.department && (
           <>
-            <span style={{ fontSize: '10px', color: '#7a6a4a' }}>·</span>
-            <span style={{ fontSize: '10px', color: '#7a6a4a' }}>{d.department}</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>·</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{d.department}</span>
           </>
         )}
       </div>
-      <div style={{ fontSize: '10px', color: '#7a6a4a', marginTop: '6px', fontStyle: 'italic' }}>
+      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic' }}>
         Click to inspect
       </div>
     </div>
@@ -177,8 +177,8 @@ export default function ClusterMap({ points, clusters, correlations, allIncident
         <div style={{ padding: '8px 16px 16px' }}>
           {/* Container provides the dark background — recharts SVG is transparent */}
           <div style={{
-            backgroundColor: '#0a0805',
-            border: '1px solid #2e2410',
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
             overflow: 'hidden',
           }}>

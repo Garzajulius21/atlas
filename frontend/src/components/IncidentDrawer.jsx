@@ -12,7 +12,7 @@ const STATUS_COLORS = {
   New:           '#ff7b7b',
   InProgress:    '#ffaa33',
   'In Progress': '#ffaa33',
-  Resolved:      '#00ff88',
+  Resolved:      '#34d399',
   Closed:        '#5a7a9a',
 };
 

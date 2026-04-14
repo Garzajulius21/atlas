@@ -198,17 +198,20 @@ export default function App() {
               recommendations={recommendations}
             />
           )}
-          <span style={{
-            fontSize: '10px',
-            color: 'var(--text-muted)',
-            padding: '3px 8px',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-            fontFamily: 'monospace',
-            letterSpacing: '0.04em',
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '4px 10px', borderRadius: 'var(--radius-md)',
+            backgroundColor: 'rgba(52,211,153,0.07)',
+            border: '1px solid rgba(52,211,153,0.2)',
           }}>
-            Local · Offline
-          </span>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34d399', flexShrink: 0 }} />
+            <span style={{
+              fontSize: '10px', color: '#34d399',
+              fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.03em',
+            }}>
+              Local · Private · Offline
+            </span>
+          </div>
         </div>
       </header>
 

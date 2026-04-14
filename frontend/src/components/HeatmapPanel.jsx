@@ -3,8 +3,8 @@ import { useState, useMemo } from 'react';
 const SEVERITY_ORDER = ['High', 'Medium', 'Low', 'Informational'];
 
 const CLUSTER_COLORS = [
-  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
-  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+  '#f97316','#8b5cf6','#2dd4bf','#f43f5e','#38bdf8',
+  '#84cc16','#34d399','#fb923c','#a78bfa','#22d3ee',
 ];
 function getClusterColor(id) {
   return id != null ? CLUSTER_COLORS[id % CLUSTER_COLORS.length] : '#4b5563';
@@ -183,7 +183,7 @@ function DeptRow({ dept, rank, maxScore, allIncidents, clusters, isLast }) {
 
       {/* Expanded: incident list */}
       {expanded && (
-        <div style={{
+        <div className="expand-in" style={{
           borderBottom: isLast ? 'none' : '1px solid var(--border)',
           padding: '12px 16px 16px',
           backgroundColor: 'var(--bg-primary)',

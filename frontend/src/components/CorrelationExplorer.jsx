@@ -9,8 +9,8 @@ const SEV_COLOR = {
 };
 
 const CLUSTER_COLORS = [
-  '#f59e0b','#a855f7','#00ff88','#ff7b7b','#38bdf8',
-  '#fb7185','#34d399','#fbbf24','#c084fc','#f97316',
+  '#f97316','#8b5cf6','#2dd4bf','#f43f5e','#38bdf8',
+  '#84cc16','#34d399','#fb923c','#a78bfa','#22d3ee',
 ];
 
 function getClusterColor(clusterId) {
@@ -226,7 +226,7 @@ function PairRow({ pair, incA, incB, clusters, correlations, allIncidents }) {
 
       {/* Expanded detail */}
       {expanded && (
-        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="expand-in" style={{ borderTop: '1px solid var(--border)', padding: '12px 14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           {/* Incident cards */}
           {incA && <IncidentCard incident={incA} clusters={clusters} correlations={correlations} allIncidents={allIncidents} side="left" />}
           {/* Middle: shared signals */}
