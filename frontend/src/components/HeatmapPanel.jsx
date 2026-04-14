@@ -39,14 +39,14 @@ function RiskBar({ score, maxScore }) {
   const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
   const { color } = riskLevel(pct);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-      <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '3px', transition: 'width 0.4s' }} />
+    <Tooltip text="Severity-weighted risk score: High ×4 · Medium ×2 · Low ×1. Relative to the highest-risk department." block>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+        <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: '3px', transition: 'width 0.4s' }} />
+        </div>
+        <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right' }}>{score}</span>
       </div>
-      <Tooltip text="Severity-weighted risk score: High ×4 · Medium ×2 · Low ×1. Relative to the highest-risk department.">
-        <span style={{ fontSize: '11px', fontFamily: 'monospace', color, minWidth: '28px', textAlign: 'right', cursor: 'default', padding: '2px 0' }}>{score}</span>
-      </Tooltip>
-    </div>
+    </Tooltip>
   );
 }
 

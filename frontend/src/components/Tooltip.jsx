@@ -4,8 +4,11 @@ import { createPortal } from 'react-dom';
 /**
  * Tooltip — renders via a portal into document.body so position:fixed is
  * always relative to the viewport, regardless of transformed/filtered ancestors.
+ *
+ * block prop: set to true when the trigger should fill its container width
+ * (e.g. table cells). Defaults to inline-block for inline use.
  */
-export default function Tooltip({ text, children, maxWidth = 220 }) {
+export default function Tooltip({ text, children, maxWidth = 220, block = false }) {
   const [pos, setPos] = useState(null);
 
   const handleEnter = (e) => {
@@ -17,7 +20,7 @@ export default function Tooltip({ text, children, maxWidth = 220 }) {
     <span
       onMouseEnter={handleEnter}
       onMouseLeave={() => setPos(null)}
-      style={{ display: 'inline-block' }}
+      style={{ display: block ? 'block' : 'inline-block', width: block ? '100%' : undefined }}
     >
       {children}
 

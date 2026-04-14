@@ -77,6 +77,7 @@ function CohesionPill({ value }) {
     <Tooltip
       text="Campaign cohesion measures how tightly linked the incidents are across shared entities, techniques, timing, and severity. ≥85% = Confirmed · ≥68% = Highly likely · ≥50% = Probable · ≥30% = Possible"
       maxWidth={260}
+      block
     >
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
