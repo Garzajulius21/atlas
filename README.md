@@ -1,9 +1,10 @@
 # ATLAS — Threat Correlation & Clustering Framework
 
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-![Stack](https://img.shields.io/badge/Stack-Python%20%2B%20React-blue)
-![Privacy](https://img.shields.io/badge/Privacy-PII%20Hashed%20Locally-green)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge)
+![Stack](https://img.shields.io/badge/Stack-Python%20%2B%20React-blue?style=for-the-badge)
+![Privacy](https://img.shields.io/badge/Privacy-PII%20Hashed%20Locally-green?style=for-the-badge)
+![Framework](https://img.shields.io/badge/Framework-MITRE%20ATT%26CK-red?style=for-the-badge)
+![License](https://img.shields.io/badge/License-Private-red?style=for-the-badge)
 
 ---
 
