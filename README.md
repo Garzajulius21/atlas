@@ -6,6 +6,8 @@
 ![Framework](https://img.shields.io/badge/Framework-MITRE%20ATT%26CK-red?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Private-red?style=for-the-badge)
 
+<p align="center"><img src="docs/screenshots/atlas_campaigns.png" alt="ATLAS campaign detection on the synthetic sample data" width="860"></p>
+
 ---
 
 ## Overview
@@ -21,6 +23,14 @@ ATLAS is a local, privacy-first threat correlation and clustering framework for 
 - **Exports a professional PDF report** — two-page executive briefing + technical detail, ready to present to leadership
 
 Runs entirely on localhost. No cloud dependencies, no API keys, no data leaves your machine.
+
+---
+
+## Screenshots
+
+<p align="center"><img src="docs/screenshots/atlas_mitre.png" alt="MITRE ATT&CK coverage" width="420">&nbsp;<img src="docs/screenshots/atlas_risk_heatmap.png" alt="Departmental risk heatmap" width="420"></p>
+
+<p align="center"><sub>MITRE ATT&CK coverage · Departmental risk heatmap</sub></p>
 
 ---
 
